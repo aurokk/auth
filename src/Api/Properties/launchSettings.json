@@ -4,7 +4,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5001",
+      "applicationUrl": "https://localhost:20000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MODE": "WEB",
@@ -21,7 +21,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MODE": "MIGRATOR",
         "Database__ConnectionString": "Host=localhost;Port=5432;Username=words;Password=password;Database=test;",
-        "Authentication__Authority": "http://localhost:5001",
+        "Authentication__Authority": "https://localhost:20000",
         "SendGrid__ApiKey": ""
       }
     }
