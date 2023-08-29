@@ -1,0 +1,29 @@
+﻿{
+  "profiles": {
+    "Api": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MODE": "WEB",
+        "Database__ConnectionString": "Host=localhost;Port=5432;Username=words;Password=password;Database=test;",
+        "Authentication__Authority": "http://localhost:5001",
+        "SendGrid__ApiKey": "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"
+      }
+    },
+    "Migrator": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MODE": "MIGRATOR",
+        "Database__ConnectionString": "Host=localhost;Port=5432;Username=words;Password=password;Database=test;",
+        "Authentication__Authority": "http://localhost:5001",
+        "SendGrid__ApiKey": ""
+      }
+    }
+  }
+}
