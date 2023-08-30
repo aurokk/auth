@@ -41,6 +41,7 @@ services
     .AddControllersWithViews();
 
 services
+    .AddEndpointsApiExplorer()
     .AddSwaggerGen(config => config.CustomSchemaIds(s => s.FullName?.Replace("+", ".")));
 
 // services
