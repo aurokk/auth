@@ -2,15 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 using Api;
 using Api.Configuration;
 using Api.Configuration.Dto;
-using Api.EmailSender;
-using Identity;
-using IdentityServer4;
-using IdentityServer4.EntityFramework.DbContexts;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -150,7 +142,11 @@ services
         options.Events.RaiseFailureEvents = true;
         options.Events.RaiseSuccessEvents = true;
         options.EmitStaticAudienceClaim = true;
-        // options.UserInteraction.LoginUrl = "http://localhost:6666/login";
+        
+        // todo: configure
+        options.UserInteraction.LoginUrl = "http://localhost:20020/login";
+        options.UserInteraction.LogoutUrl = "http://localhost:20020/logout";
+        options.UserInteraction.ConsentUrl = "http://localhost:20020/consent";
     })
     .AddSigningCredential(secret)
     .AddInMemoryApiScopes(Config.ApiScopes)
@@ -208,9 +204,9 @@ switch (mode)
     case "MIGRATOR":
     {
         // pgdc
-        using var scope = application.Services.CreateScope();
-        var pgc = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
-        await pgc.Database.MigrateAsync();
+        // using var scope = application.Services.CreateScope();
+        // var pgc = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
+        // await pgc.Database.MigrateAsync();
 
         // cdc
         // var cc = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
