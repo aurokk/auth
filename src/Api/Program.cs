@@ -2,7 +2,9 @@ using System.Security.Cryptography.X509Certificates;
 using Api;
 using Api.Configuration;
 using Api.Configuration.Dto;
+using IdentityServer4.Stores;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -134,6 +136,13 @@ services
             ForwardedHeaders.XForwardedHost
     );
 
+// overrides
+services
+    .AddSingleton<IConsentResponseMessageStore, ConsentResponseMessageStore>()
+    .AddSingleton<ILoginResponseMessageStore, LoginResponseMessageStore>()
+    .AddSingleton<ILoginRequestIdToResponseIdMessageStore, LoginRequestIdToResponseIdMessageStore>()
+    .AddSingleton<ILoginResponseIdToRequestIdMessageStore, LoginResponseIdToRequestIdMessageStore>();
+
 services
     .AddIdentityServer(options =>
     {
@@ -142,7 +151,7 @@ services
         options.Events.RaiseFailureEvents = true;
         options.Events.RaiseSuccessEvents = true;
         options.EmitStaticAudienceClaim = true;
-        
+
         // todo: configure
         options.UserInteraction.LoginUrl = "http://localhost:20020/login";
         options.UserInteraction.LogoutUrl = "http://localhost:20020/logout";
