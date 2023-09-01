@@ -25,55 +25,33 @@ public static class Config
     public static IEnumerable<Client> Clients =>
         new[]
         {
-            // web app
             new Client
             {
-                ClientId = "web-app",
-                AllowedGrantTypes =
-                {
-                    GrantType.AuthorizationCode,
-                    // GrantType.ResourceOwnerPassword,
-                    // "custom:signinwithapple_idtoken"
-                    
-                },
-                AllowedScopes = { "words-api", },
-                RequireClientSecret = false,
-                RequirePkce = false,
-                AllowOfflineAccess = false,
                 AccessTokenLifetime = 1 * 24 * 60 * 60, // 1 day
-                RedirectUris =
-                {
-                    "http://localhost:10000",
-                    // "vocabu://auth-callback",
-                },
+                AllowedGrantTypes = { GrantType.Implicit, },
+                AllowedScopes = { "words-api", },
+                AllowAccessTokensViaBrowser = true,
+                AllowOfflineAccess = false,
+                ClientId = "implicit",
+                RedirectUris = { "http://localhost:10000", },
             },
-
-            // mobile app
-            // new Client
-            // {
-            //     ClientId = "words-app",
-            //     AllowedGrantTypes =
-            //     {
-            //         GrantType.AuthorizationCode,
-            //         GrantType.ResourceOwnerPassword,
-            //         "custom:signinwithapple_idtoken"
-            //     },
-            //     RequireClientSecret = false,
-            //     AllowedScopes = { "words-api", },
-            //     RequirePkce = true,
-            //     AllowOfflineAccess = true,
-            //     RefreshTokenUsage = TokenUsage.OneTimeOnly,
-            //     RefreshTokenExpiration = TokenExpiration.Sliding,
-            //     AbsoluteRefreshTokenLifetime = 0,
-            //     AccessTokenLifetime = 7 * 24 * 60 * 60,
-            //     SlidingRefreshTokenLifetime = 365 * 24 * 60 * 60,
-            //     // AccessTokenLifetime = 15,
-            //     // SlidingRefreshTokenLifetime = 60,
-            //     RedirectUris =
-            //     {
-            //         "vocabu://auth-callback",
-            //     },
-            // },
+            new Client
+            {
+                AbsoluteRefreshTokenLifetime = 0,
+                AccessTokenLifetime = 1 * 24 * 60 * 60, // 1 day
+                AllowedGrantTypes = { GrantType.AuthorizationCode, },
+                AllowedScopes = { "words-api", },
+                AllowAccessTokensViaBrowser = false,
+                AllowOfflineAccess = true,
+                ClientId = "authorization-code",
+                ClientSecrets = { new Secret("authorization-code-secret".Sha256()) },
+                RedirectUris = { "http://localhost:10010", },
+                RefreshTokenExpiration = TokenExpiration.Sliding,
+                RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                RequireClientSecret = true,
+                RequirePkce = false,
+                SlidingRefreshTokenLifetime = 14 * 24 * 60 * 60, // 14 days
+            },
         };
 
     public static List<TestUser> Users => new()
