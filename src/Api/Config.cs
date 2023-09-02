@@ -10,15 +10,15 @@ public static class Config
     public static IEnumerable<ApiScope> ApiScopes =>
         new ApiScope[]
         {
-            new ApiScope(name: "words-api"),
+            new ApiScope("protected-resource.read", "Read access to Protected Resource"),
         };
 
     public static IEnumerable<ApiResource> ApiResources =>
         new ApiResource[]
         {
-            new ApiResource("words-api", "Words Api")
+            new ApiResource("protected-resource", "Protected Resource")
             {
-                Scopes = { "words-api", },
+                Scopes = { "protected-resource.read", },
             },
         };
 
@@ -29,7 +29,7 @@ public static class Config
             {
                 AccessTokenLifetime = 1 * 24 * 60 * 60, // 1 day
                 AllowedGrantTypes = { GrantType.Implicit, },
-                AllowedScopes = { "words-api", },
+                AllowedScopes = { "protected-resource.read", },
                 AllowAccessTokensViaBrowser = true,
                 AllowOfflineAccess = false,
                 ClientId = "implicit",
@@ -40,7 +40,7 @@ public static class Config
                 AbsoluteRefreshTokenLifetime = 0,
                 AccessTokenLifetime = 1 * 24 * 60 * 60, // 1 day
                 AllowedGrantTypes = { GrantType.AuthorizationCode, },
-                AllowedScopes = { "words-api", },
+                AllowedScopes = { "protected-resource.read", },
                 AllowAccessTokensViaBrowser = false,
                 AllowOfflineAccess = true,
                 ClientId = "authorization-code",
