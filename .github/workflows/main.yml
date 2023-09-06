@@ -21,10 +21,10 @@ jobs:
             ${{ vars.DOCKERHUB_USERNAME }}/auth
           tags: |
             type=sha,prefix=,suffix=,format=long
-#      - name: Build and push to Docker Hub
-#        uses: docker/build-push-action@v4
-#        with:
-#          context: .
-#          push: true
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
