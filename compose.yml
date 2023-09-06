@@ -1,0 +1,6 @@
+services:
+  auth:
+    build: .
+    ports:
+      - "20000:80"
+      
