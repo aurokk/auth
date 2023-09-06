@@ -12,10 +12,21 @@ public sealed record AcceptRequest(
 );
 
 [PublicAPI]
+public sealed record AcceptResponse(
+    string? LoginResponseId
+);
+
+[PublicAPI]
 public sealed record RejectRequest(
     string? LoginRequestId
 );
 
+[PublicAPI]
+public sealed record RejectResponse(
+    string? LoginResponseId
+);
+
+[ApiExplorerSettings(GroupName = SwaggerPrivateExtensions.Name)]
 [ApiController]
 [Route("api/private/login/callback")]
 public class LoginCallbackController : ControllerBase
@@ -32,6 +43,7 @@ public class LoginCallbackController : ControllerBase
 
     [HttpPost]
     [Route("accept")]
+    [ProducesResponseType(typeof(AcceptResponse), 200)]
     public async Task<IActionResult> Accept(AcceptRequest request, CancellationToken ct)
     {
         var id = request.LoginRequestId;
@@ -58,11 +70,13 @@ public class LoginCallbackController : ControllerBase
         var lrMessage = new Message<LoginResponse>(lr, utcNow);
         await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
 
-        return Ok(new { LoginResponseId = requestIdToResponseIdMessage.Data.LoginResponseId, });
+        var response = new AcceptResponse(requestIdToResponseIdMessage.Data.LoginResponseId);
+        return Ok(response);
     }
 
     [HttpPost]
     [Route("reject")]
+    [ProducesResponseType(typeof(RejectResponse), 200)]
     public async Task<IActionResult> Reject(RejectRequest request, CancellationToken ct)
     {
         var id = request.LoginRequestId;
@@ -82,6 +96,7 @@ public class LoginCallbackController : ControllerBase
         var lrMessage = new Message<LoginResponse>(lr, utcNow);
         await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
 
-        return Ok(new { LoginResponseId = requestIdToResponseIdMessage.Data.LoginResponseId, });
+        var response = new RejectResponse(requestIdToResponseIdMessage.Data.LoginResponseId);
+        return Ok(response);
     }
 }

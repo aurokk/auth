@@ -5,6 +5,7 @@ using Api.Configuration.Dto;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,13 @@ services
 
 services
     .AddEndpointsApiExplorer()
-    .AddSwaggerGen(config => config.CustomSchemaIds(s => s.FullName?.Replace("+", ".")));
+    .AddSwaggerGen(config =>
+    {
+        config.AddPrivateDoc();
+        config.AddPublicDoc();
+        config.CustomSchemaIds(s => s.FullName?.Replace("+", "."));
+        config.DocInclusionPredicate((name, api) => name == api.GroupName);
+    });
 
 // services
 //     .AddDbContext<ApplicationDbContext>((sp, options) =>
@@ -194,7 +201,11 @@ var application = builder.Build();
 
 application
     .UseSwagger()
-    .UseSwaggerUI();
+    .UseSwaggerUI(config =>
+    {
+        config.AddPrivateEndpoint();
+        config.AddPublicEndpoint();
+    });
 
 application
     .UseForwardedHeaders()
