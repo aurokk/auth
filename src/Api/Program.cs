@@ -14,20 +14,20 @@ var services = builder.Services;
 
 var applicationSettingsDto = new ApplicationConfigurationDto();
 configuration.Bind(applicationSettingsDto);
-var applicationSettings = new ApplicationConfiguration(
-    database: new DatabaseConfiguration(
-        connectionString: applicationSettingsDto.Database?.ConnectionString ?? throw new ApplicationException()
-    ),
-    authentication: new AuthenticationConfiguration(
-        authority: applicationSettingsDto.Authentication?.Authority ?? throw new ApplicationException()
-    ),
-    sendGrid: new SendGridConfiguration(
-        apiKey: applicationSettingsDto.SendGrid?.ApiKey ?? throw new ApplicationException()
-    )
-);
-
-services
-    .AddSingleton(_ => applicationSettings);
+// var applicationSettings = new ApplicationConfiguration(
+//     database: new DatabaseConfiguration(
+//         connectionString: applicationSettingsDto.Database?.ConnectionString ?? throw new ApplicationException()
+//     ),
+//     authentication: new AuthenticationConfiguration(
+//         authority: applicationSettingsDto.Authentication?.Authority ?? throw new ApplicationException()
+//     ),
+//     sendGrid: new SendGridConfiguration(
+//         apiKey: applicationSettingsDto.SendGrid?.ApiKey ?? throw new ApplicationException()
+//     )
+// );
+//
+// services
+//     .AddSingleton(_ => applicationSettings);
 
 // services
 //     .AddTransient<IEmailSender, EmailSender>();
