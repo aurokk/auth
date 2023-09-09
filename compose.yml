@@ -1,6 +1,13 @@
+version: "3.9"
 services:
   auth:
     build: .
+    environment:
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/localhost.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: localhost
+      ASPNETCORE_URLS: "https://+"
+      MODE: WEB
     ports:
-      - "20000:80"
-      
+      - "20000:443"
+    volumes:
+      - /Users/dk/.aspnet/https/localhost.pfx:/https/localhost.pfx
