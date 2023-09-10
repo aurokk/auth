@@ -15,17 +15,20 @@ namespace IdentityServer.UnitTests.Extensions
     public class IResourceStoreExtensionsTests
     {
         [Fact]
-        public void GetAllEnabledResourcesAsync_on_duplicate_identity_scopes_should_fail()
+        public async Task GetAllEnabledResourcesAsync_on_duplicate_identity_scopes_should_fail()
         {
             var store = new MockResourceStore()
             {
-                IdentityResources = {
+                IdentityResources =
+                {
                     new IdentityResource { Name = "A" },
-                    new IdentityResource { Name = "A" } }
+                    new IdentityResource { Name = "A" }
+                }
             };
 
             Func<Task> a = () => store.GetAllEnabledResourcesAsync();
-            a.Should().Throw<Exception>().And.Message.ToLowerInvariant().Should().Contain("duplicate").And.Contain("identity scopes");
+            var result = await a.Should().ThrowAsync<Exception>();
+            result.And.Message.ToLowerInvariant().Should().Contain("duplicate").And.Contain("identity scopes");
         }
 
         [Fact]
@@ -33,16 +36,18 @@ namespace IdentityServer.UnitTests.Extensions
         {
             var store = new MockResourceStore()
             {
-                IdentityResources = {
+                IdentityResources =
+                {
                     new IdentityResource { Name = "A" },
-                    new IdentityResource { Name = "B" } }
+                    new IdentityResource { Name = "B" }
+                }
             };
 
             await store.GetAllEnabledResourcesAsync();
         }
 
         [Fact]
-        public void GetAllEnabledResourcesAsync_on_duplicate_api_resources_should_fail()
+        public async Task GetAllEnabledResourcesAsync_on_duplicate_api_resources_should_fail()
         {
             var store = new MockResourceStore()
             {
@@ -50,7 +55,8 @@ namespace IdentityServer.UnitTests.Extensions
             };
 
             Func<Task> a = () => store.GetAllEnabledResourcesAsync();
-            a.Should().Throw<Exception>().And.Message.ToLowerInvariant().Should().Contain("duplicate").And.Contain("api resources");
+            var result = await a.Should().ThrowAsync<Exception>();
+            result.And.Message.ToLowerInvariant().Should().Contain("duplicate").And.Contain("api resources");
         }
 
         [Fact]
@@ -65,17 +71,21 @@ namespace IdentityServer.UnitTests.Extensions
         }
 
         [Fact]
-        public void FindResourcesByScopeAsync_on_duplicate_identity_scopes_should_fail()
+        public async Task FindResourcesByScopeAsync_on_duplicate_identity_scopes_should_fail()
         {
             var store = new MockResourceStore()
             {
-                IdentityResources = {
+                IdentityResources =
+                {
                     new IdentityResource { Name = "A" },
-                    new IdentityResource { Name = "A" } }
+                    new IdentityResource { Name = "A" }
+                }
             };
 
             Func<Task> a = () => store.FindResourcesByScopeAsync(new string[] { "A" });
-            a.Should().Throw<Exception>().And.Message.ToLowerInvariant().Should().Contain("duplicate").And.Contain("identity scopes");
+            var result = await a.Should().ThrowAsync<Exception>();
+            result.And.Message.ToLowerInvariant().Should().Contain("duplicate").And
+                .Contain("identity scopes");
         }
 
         [Fact]
@@ -83,9 +93,11 @@ namespace IdentityServer.UnitTests.Extensions
         {
             var store = new MockResourceStore()
             {
-                IdentityResources = {
+                IdentityResources =
+                {
                     new IdentityResource { Name = "A" },
-                    new IdentityResource { Name = "B" } }
+                    new IdentityResource { Name = "B" }
+                }
             };
 
             await store.FindResourcesByScopeAsync(new string[] { "A" });
@@ -96,13 +108,15 @@ namespace IdentityServer.UnitTests.Extensions
         {
             var store = new MockResourceStore()
             {
-                ApiResources = { 
+                ApiResources =
+                {
                     new ApiResource { Name = "api1", Scopes = { "a" } },
                     new ApiResource() { Name = "api2", Scopes = { "a" } },
                 },
-                ApiScopes = { 
-                    new ApiScope("a") 
-                } 
+                ApiScopes =
+                {
+                    new ApiScope("a")
+                }
             };
 
             var result = await store.FindResourcesByScopeAsync(new string[] { "a" });
@@ -124,16 +138,20 @@ namespace IdentityServer.UnitTests.Extensions
         }
 
         [Fact]
-        public async Task FindResourcesByScopeAsync_with_duplicate_api_scopes_on_single_api_resource_should_succeed_and_only_reuturn_one_resource()
+        public async Task
+            FindResourcesByScopeAsync_with_duplicate_api_scopes_on_single_api_resource_should_succeed_and_only_reuturn_one_resource()
         {
             var store = new MockResourceStore()
             {
-                ApiResources = { 
-                    new ApiResource { 
+                ApiResources =
+                {
+                    new ApiResource
+                    {
                         Name = "api1", Scopes = { "a", "a" }
                     }
                 },
-                ApiScopes = {
+                ApiScopes =
+                {
                     new ApiScope("a"),
                 }
             };
@@ -151,8 +169,8 @@ namespace IdentityServer.UnitTests.Extensions
             public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names)
             {
                 var apis = from a in ApiResources
-                          where names.Contains(a.Name)
-                          select a;
+                    where names.Contains(a.Name)
+                    select a;
                 return Task.FromResult(apis);
             }
 
@@ -161,8 +179,8 @@ namespace IdentityServer.UnitTests.Extensions
                 if (names == null) throw new ArgumentNullException(nameof(names));
 
                 var api = from a in ApiResources
-                          where a.Scopes.Any(x => names.Contains(x))
-                          select a;
+                    where a.Scopes.Any(x => names.Contains(x))
+                    select a;
 
                 return Task.FromResult(api);
             }
@@ -172,8 +190,8 @@ namespace IdentityServer.UnitTests.Extensions
                 if (names == null) throw new ArgumentNullException(nameof(names));
 
                 var identity = from i in IdentityResources
-                               where names.Contains(i.Name)
-                               select i;
+                    where names.Contains(i.Name)
+                    select i;
 
                 return Task.FromResult(identity);
             }
@@ -181,8 +199,8 @@ namespace IdentityServer.UnitTests.Extensions
             public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
             {
                 var q = from x in ApiScopes
-                        where scopeNames.Contains(x.Name)
-                        select x;
+                    where scopeNames.Contains(x.Name)
+                    select x;
                 return Task.FromResult(q);
             }
 

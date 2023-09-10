@@ -49,7 +49,8 @@ namespace IdentityServer.UnitTests.ResponseHandling
             }.CreatePrincipal();
 
             _resourceStore = new InMemoryResourcesStore(_identityResources, _apiResources, _apiScopes);
-            _subject = new UserInfoResponseGenerator(_mockProfileService, _resourceStore, TestLogger.Create<UserInfoResponseGenerator>());
+            _subject = new UserInfoResponseGenerator(_mockProfileService, _resourceStore,
+                TestLogger.Create<UserInfoResponseGenerator>());
         }
 
         [Fact]
@@ -114,7 +115,7 @@ namespace IdentityServer.UnitTests.ResponseHandling
         {
             _identityResources.Add(new IdentityResource("id1", new[] { "foo" }));
             _identityResources.Add(new IdentityResource("id2", new[] { "bar" }));
-            
+
             var address = new
             {
                 street_address = "One Hacker Way",
@@ -122,12 +123,14 @@ namespace IdentityServer.UnitTests.ResponseHandling
                 postal_code = 69118,
                 country = "Germany"
             };
-            
+
             _mockProfileService.ProfileClaims = new[]
             {
                 new Claim("email", "fred@gmail.com"),
                 new Claim("name", "fred jones"),
-                new Claim("address", @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }", IdentityServerConstants.ClaimValueTypes.Json),
+                new Claim("address",
+                    @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }",
+                    IdentityServerConstants.ClaimValueTypes.Json),
                 new Claim("address2", JsonSerializer.Serialize(address), IdentityServerConstants.ClaimValueTypes.Json)
             };
 
@@ -152,14 +155,18 @@ namespace IdentityServer.UnitTests.ResponseHandling
             claims["email"].Should().Be("fred@gmail.com");
             claims.Should().ContainKey("name");
             claims["name"].Should().Be("fred jones");
-            
+
             // this will be treated as a string because this is not valid JSON from the System.Text library point of view
             claims.Should().ContainKey("address");
-            claims["address"].Should().Be("{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
-            
+            claims["address"].Should()
+                .Be(
+                    "{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
+
             // this is a JsonElement
             claims.Should().ContainKey("address2");
-            claims["address2"].ToString().Should().Be("{\"street_address\":\"One Hacker Way\",\"locality\":\"Heidelberg\",\"postal_code\":69118,\"country\":\"Germany\"}");
+            claims["address2"].ToString().Should()
+                .Be(
+                    "{\"street_address\":\"One Hacker Way\",\"locality\":\"Heidelberg\",\"postal_code\":69118,\"country\":\"Germany\"}");
         }
 
         [Fact]
@@ -190,7 +197,7 @@ namespace IdentityServer.UnitTests.ResponseHandling
         }
 
         [Fact]
-        public void ProcessAsync_should_throw_if_incorrect_sub_issued_by_profile_service()
+        public async Task ProcessAsync_should_throw_if_incorrect_sub_issued_by_profile_service()
         {
             _identityResources.Add(new IdentityResource("id1", new[] { "foo" }));
             _identityResources.Add(new IdentityResource("id2", new[] { "bar" }));
@@ -216,9 +223,8 @@ namespace IdentityServer.UnitTests.ResponseHandling
 
             Func<Task> act = () => _subject.ProcessAsync(result);
 
-            act.Should().Throw<InvalidOperationException>()
-                .And.Message.Should().Contain("subject");
+            var resultX = await act.Should().ThrowAsync<InvalidOperationException>();
+            resultX.And.Message.Should().Contain("subject");
         }
-
     }
 }
