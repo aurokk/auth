@@ -35,4 +35,11 @@
         <ProjectReference Include="..\IdentityServer4\IdentityServer4.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\LoggedOut.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\Login.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Account\Logout.cshtml" />
+    </ItemGroup>
+
 </Project>
