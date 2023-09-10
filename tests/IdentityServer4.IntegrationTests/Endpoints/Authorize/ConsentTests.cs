@@ -8,6 +8,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentAssertions;
+using IdentityModel.Client;
 using IdentityServer.IntegrationTests.Common;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
@@ -26,7 +27,8 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
 
         public ConsentTests()
         {
-            _mockPipeline.Clients.AddRange(new Client[] {
+            _mockPipeline.Clients.AddRange(new Client[]
+            {
                 new Client
                 {
                     ClientId = "client1",
@@ -69,12 +71,14 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                 }
             });
 
-            _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {
+            _mockPipeline.IdentityScopes.AddRange(new IdentityResource[]
+            {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
                 new IdentityResources.Email()
             });
-            _mockPipeline.ApiResources.AddRange(new ApiResource[] {
+            _mockPipeline.ApiResources.AddRange(new ApiResource[]
+            {
                 new ApiResource
                 {
                     Name = "api",
@@ -142,11 +146,11 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                 state: "123_state",
                 nonce: "123_nonce",
                 acrValues: "acr_1 acr_2 tenant:tenant_value",
-                extra: new
+                extra: new Parameters()
                 {
-                    display = "popup", // must use a valid value form the spec for display
-                    ui_locales = "ui_locale_value",
-                    custom_foo = "foo_value"
+                    { "display", "popup" }, // must use a valid value form the spec for display
+                    { "ui_locales", "ui_locale_value" },
+                    { "custom_foo", "foo_value" }
                 }
             );
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
@@ -159,7 +163,8 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             _mockPipeline.ConsentRequest.AcrValues.Should().BeEquivalentTo(new string[] { "acr_2", "acr_1" });
             _mockPipeline.ConsentRequest.Parameters.AllKeys.Should().Contain("custom_foo");
             _mockPipeline.ConsentRequest.Parameters["custom_foo"].Should().Be("foo_value");
-            _mockPipeline.ConsentRequest.ValidatedResources.RawScopeValues.Should().BeEquivalentTo(new string[] { "api2", "openid", "api1" });
+            _mockPipeline.ConsentRequest.ValidatedResources.RawScopeValues.Should()
+                .BeEquivalentTo(new string[] { "api2", "openid", "api1" });
         }
 
         [Theory]
