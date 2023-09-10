@@ -5,7 +5,8 @@ services:
     environment:
       ASPNETCORE_Kestrel__Certificates__Default__Path: /https/localhost.pfx
       ASPNETCORE_Kestrel__Certificates__Default__Password: localhost
-      ASPNETCORE_URLS: "https://+"
+      ASPNETCORE_URLS: "http://+;https://+"
+      IdentityUI__BaseUrl: "http://localhost:20020"
       MODE: WEB
     ports:
       - "20000:443"

@@ -65,12 +65,14 @@ services
         options.Events.RaiseInformationEvents = true;
         options.Events.RaiseFailureEvents = true;
         options.Events.RaiseSuccessEvents = true;
+
         options.EmitStaticAudienceClaim = true;
 
-        // todo: configure
-        options.UserInteraction.LoginUrl = "http://localhost:20020/login";
-        options.UserInteraction.LogoutUrl = "http://localhost:20020/logout";
-        options.UserInteraction.ConsentUrl = "http://localhost:20020/consent";
+        var identityBaseUrl = configuration.GetValue<string>("IdentityUI:BaseUrl") ?? throw new Exception();
+        var identityBaseUri = new Uri(identityBaseUrl);
+        options.UserInteraction.LoginUrl = new Uri(identityBaseUri, "login").AbsoluteUri;
+        options.UserInteraction.LogoutUrl = new Uri(identityBaseUri, "logout").AbsoluteUri;
+        options.UserInteraction.ConsentUrl = new Uri(identityBaseUri, "consent").AbsoluteUri;
     })
     .AddSigningCredential(secret)
     .AddInMemoryApiScopes(Config.ApiScopes)
