@@ -14,7 +14,6 @@ using IdentityServer4.EntityFramework.Stores;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Xunit;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
