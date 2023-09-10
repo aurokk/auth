@@ -5,10 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\IdentityServer4.Storage\IdentityServer4.Storage.csproj" />
     </ItemGroup>
 
