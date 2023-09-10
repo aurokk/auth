@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
 WORKDIR /source
 COPY *.sln                                                                   .
@@ -19,7 +19,7 @@ COPY tests/. ./tests/
 WORKDIR /source/src/Api
 RUN dotnet publish -c release -o /dist --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
 COPY --from=build /dist ./
 ENTRYPOINT ["dotnet", "Api.dll"]
