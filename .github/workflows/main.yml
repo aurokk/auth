@@ -30,6 +30,6 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64 # linux/arm64 isn't supported in qemu https://github.com/dotnet/core/blob/main/release-notes/7.0/supported-os.md#qemu
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
