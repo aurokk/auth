@@ -1,7 +1,35 @@
 version: "3.9"
 services:
+  auth-db:
+    image: postgres
+    restart: no
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "20002:5432"
+    volumes:
+      - auth:/var/lib/postgresql/data
+  auth-migrator:
+    build: .
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    restart: no
+    environment:
+      MODE: MIGRATOR
+      Database__ConnectionString: "Host=auth-db;Port=5432;Username=auth;Password=auth;Database=auth;"
   auth:
     build: .
+    depends_on:
+      auth-migrator:
+        condition: service_completed_successfully
     environment:
       ASPNETCORE_Kestrel__Certificates__Default__Path: /https/localhost.pfx
       ASPNETCORE_Kestrel__Certificates__Default__Password: localhost
@@ -12,3 +40,5 @@ services:
       - "20000:443"
     volumes:
       - /Users/dk/.aspnet/https/localhost.pfx:/https/localhost.pfx
+volumes:
+  auth:

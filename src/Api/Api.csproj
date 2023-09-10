@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
@@ -28,6 +28,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
+        <ProjectReference Include="..\Migrations\Migrations.csproj" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Api\Private\Configuration\" />
     </ItemGroup>
 
 </Project>

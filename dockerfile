@@ -3,6 +3,7 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /source
 COPY *.sln                                                                   .
 COPY src/Api/*.csproj                                                        ./src/Api/
+COPY src/Migrations/*.csproj                                                 ./src/Migrations/
 COPY src/IdentityServer4/*.csproj                                            ./src/IdentityServer4/
 COPY src/IdentityServer4.EntityFramework/*.csproj                            ./src/IdentityServer4.EntityFramework/
 COPY src/IdentityServer4.EntityFramework.Storage/*.csproj                    ./src/IdentityServer4.EntityFramework.Storage/

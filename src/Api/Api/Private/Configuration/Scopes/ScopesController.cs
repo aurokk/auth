@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Api.Private.Scopes;
+namespace Api.Api.Private.Configuration.Scopes;
 
 [ApiController]
-[Route("api/private/resources")]
+[Route("api/private/configuration/resources")]
 public class ScopesController : ControllerBase
 {
     // private readonly ConfigurationDbContext _context;

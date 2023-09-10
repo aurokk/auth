@@ -1,7 +1,9 @@
 using System.Security.Cryptography.X509Certificates;
 using Api;
+using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,40 +70,33 @@ services
 
         options.EmitStaticAudienceClaim = true;
 
-        var identityBaseUrl = configuration.GetValue<string>("IdentityUI:BaseUrl") ?? throw new Exception();
+        var identityBaseUrl = configuration.GetValue<string>("IdentityUI:BaseUrl") ?? "http://empty";
         var identityBaseUri = new Uri(identityBaseUrl);
         options.UserInteraction.LoginUrl = new Uri(identityBaseUri, "login").AbsoluteUri;
         options.UserInteraction.LogoutUrl = new Uri(identityBaseUri, "logout").AbsoluteUri;
         options.UserInteraction.ConsentUrl = new Uri(identityBaseUri, "consent").AbsoluteUri;
     })
     .AddSigningCredential(secret)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryApiResources(Config.ApiResources)
-    .AddInMemoryClients(Config.Clients)
-    .AddInMemoryPersistedGrants();
-// если нужно хранить конфигурацию в БД
-    // .AddConfigurationStore(options =>
-    // {
-    //     options.ConfigureDbContext = builder =>
-    //     {
-    //         // builder
-    //         //     .UseNpgsql(
-    //         //         applicationSettings.Database.ConnectionString,
-    //         //         x => x.MigrationsAssembly("Migrations")
-    //         //     );
-    //     };
-    // });
-// .AddOperationalStore(options =>
-// {
-//     options.ConfigureDbContext = builder =>
-//     {
-//         builder
-//             .UseNpgsql(
-//                 applicationSettings.Database.ConnectionString,
-//                 x => x.MigrationsAssembly("Migrations")
-//             );
-//     };
-// });
+    // .AddInMemoryApiScopes(Config.ApiScopes)
+    // .AddInMemoryApiResources(Config.ApiResources)
+    // .AddInMemoryClients(Config.Clients)
+    // .AddInMemoryPersistedGrants()
+    .AddConfigurationStore(options =>
+    {
+        options.ConfigureDbContext = dbContextBuilder =>
+        {
+            var connectionString = configuration.GetValue<string>("Database:ConnectionString");
+            dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
+        };
+    })
+    .AddOperationalStore(options =>
+    {
+        options.ConfigureDbContext = dbContextBuilder =>
+        {
+            var connectionString = configuration.GetValue<string>("Database:ConnectionString");
+            dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
+        };
+    });
 // .AddAspNetIdentity<ApplicationUser>()
 // .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
 // .AddExtensionGrantValidator<CustomSignInWithAppleGrantValidator>();
@@ -132,19 +127,11 @@ switch (mode)
 {
     case "MIGRATOR":
     {
-        // pgdc
-        // using var scope = application.Services.CreateScope();
-        // var pgc = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
-        // await pgc.Database.MigrateAsync();
-
-        // cdc
-        // var cc = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-        // await cc.Database.MigrateAsync();
-
-        // aidc
-        // var aidc = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        // await aidc.Database.MigrateAsync();
-
+        using var scope = application.Services.CreateScope();
+        var pgc = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
+        await pgc.Database.MigrateAsync();
+        var cc = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+        await cc.Database.MigrateAsync();
         return;
     }
 
