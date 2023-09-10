@@ -75,22 +75,22 @@ services
         options.UserInteraction.ConsentUrl = new Uri(identityBaseUri, "consent").AbsoluteUri;
     })
     .AddSigningCredential(secret)
-    // .AddInMemoryApiScopes(Config.ApiScopes)
-    // .AddInMemoryApiResources(Config.ApiResources)
-    // .AddInMemoryClients(Config.Clients)
-    .AddInMemoryPersistedGrants()
+    .AddInMemoryApiScopes(Config.ApiScopes)
+    .AddInMemoryApiResources(Config.ApiResources)
+    .AddInMemoryClients(Config.Clients)
+    .AddInMemoryPersistedGrants();
 // если нужно хранить конфигурацию в БД
-    .AddConfigurationStore(options =>
-    {
-        options.ConfigureDbContext = builder =>
-        {
-            // builder
-            //     .UseNpgsql(
-            //         applicationSettings.Database.ConnectionString,
-            //         x => x.MigrationsAssembly("Migrations")
-            //     );
-        };
-    });
+    // .AddConfigurationStore(options =>
+    // {
+    //     options.ConfigureDbContext = builder =>
+    //     {
+    //         // builder
+    //         //     .UseNpgsql(
+    //         //         applicationSettings.Database.ConnectionString,
+    //         //         x => x.MigrationsAssembly("Migrations")
+    //         //     );
+    //     };
+    // });
 // .AddOperationalStore(options =>
 // {
 //     options.ConfigureDbContext = builder =>
