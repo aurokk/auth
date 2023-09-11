@@ -3,7 +3,6 @@
 
 
 using IdentityModel;
-using System.Collections.Generic;
 
 namespace IdentityServer4.ResponseHandling
 {

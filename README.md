@@ -18,7 +18,7 @@ dotnet tool restore
 ```
 
 ```
-dotnet ef migrations add Initial \
+dotnet ef migrations add Test \
 -o Migrations/Configuration \
 --context ConfigurationDbContext \
 --project src/Migrations \

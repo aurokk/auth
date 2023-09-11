@@ -4,8 +4,6 @@
 
 using IdentityServer4.Extensions;
 using IdentityServer4.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.Events
 {

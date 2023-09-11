@@ -2,14 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using System.Linq;
 using IdentityServer4.Validation;
-using System.Threading.Tasks;
 using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System;
 using IdentityServer4.Extensions;
 using IdentityServer4.Configuration;
 using System.Text.Encodings.Web;

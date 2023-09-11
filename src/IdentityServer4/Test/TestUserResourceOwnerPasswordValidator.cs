@@ -4,8 +4,6 @@
 
 using IdentityModel;
 using IdentityServer4.Validation;
-using System.Threading.Tasks;
-using System;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServer4.Test

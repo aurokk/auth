@@ -3,7 +3,6 @@
 
 
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests
 {

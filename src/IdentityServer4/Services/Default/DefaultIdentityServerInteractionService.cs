@@ -6,11 +6,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServer4.Services

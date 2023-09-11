@@ -3,7 +3,6 @@
 
 
 using IdentityServer4.Stores;
-using System;
 
 namespace IdentityServer4.Extensions
 {

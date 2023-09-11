@@ -4,8 +4,6 @@
 
 using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.Extensions
 {

@@ -3,7 +3,6 @@
 
 
 using IdentityModel;
-using System.Linq;
 
 namespace IdentityServer4.Models
 {

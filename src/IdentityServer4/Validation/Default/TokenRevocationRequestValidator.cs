@@ -6,9 +6,7 @@ using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation
 {

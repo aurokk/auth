@@ -6,8 +6,6 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using System.Linq;
 using IdentityModel;
 using Microsoft.AspNetCore.Http;
 

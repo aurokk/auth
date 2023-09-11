@@ -5,9 +5,7 @@
 using IdentityServer4;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using Microsoft.AspNetCore.Authentication;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

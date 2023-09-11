@@ -6,8 +6,6 @@ using IdentityModel;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation
 {

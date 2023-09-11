@@ -5,8 +5,6 @@
 #pragma warning disable 1591
 
 using IdentityServer4.Models;
-using System;
-using System.Collections.Generic;
 
 namespace IdentityServer4.EntityFramework.Entities
 {

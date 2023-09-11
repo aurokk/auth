@@ -5,9 +5,7 @@
 using IdentityServer4.Configuration;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 #pragma warning disable 1591
 

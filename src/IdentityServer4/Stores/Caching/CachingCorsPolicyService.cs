@@ -4,7 +4,6 @@
 
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
-using System.Threading.Tasks;
 using IdentityServer4.Configuration;
 using Microsoft.Extensions.Logging;
 

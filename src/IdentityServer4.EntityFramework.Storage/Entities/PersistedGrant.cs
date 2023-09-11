@@ -4,8 +4,6 @@
 
 #pragma warning disable 1591
 
-using System;
-
 namespace IdentityServer4.EntityFramework.Entities
 {
     public class PersistedGrant

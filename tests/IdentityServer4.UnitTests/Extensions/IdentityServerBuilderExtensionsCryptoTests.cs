@@ -6,8 +6,6 @@ using IdentityServer4;
 using IdentityServer4.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IO;
 using System.Security.Cryptography;
 using Xunit;
 

@@ -3,7 +3,6 @@
 
 
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using IdentityServer4.Models;
 
 namespace IdentityServer4.Validation

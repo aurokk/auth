@@ -4,13 +4,10 @@
 
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using System.Security.Claims;
 using IdentityServer4.Services;
 using IdentityModel;
-using System;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServer4

@@ -1,0 +1,459 @@
+{
+	"info": {
+		"_postman_id": "5dfec797-7e9f-4a31-9122-4f5595fdfc10",
+		"name": "Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1552284"
+	},
+	"item": [
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "api/private/configuration/clients/create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"scope\": {\n        \"displayName\": \"Test\",\n        \"name\": \"test\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/clients/create",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"clients",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/clients/list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/clients/list",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"clients",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/clients/update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"2\",\n    \"scope\": {\n        \"displayName\": \"Test update\",\n        \"name\": \"test-update\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/clients/update",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"clients",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/clients/delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/clients/delete",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"clients",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Resources",
+			"item": [
+				{
+					"name": "api/private/configuration/resources/create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resource\": {\n        \"displayName\": \"test\",\n        \"name\": \"test\",\n        \"scopes\": [ \"test\" ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/resources/create",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"resources",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/resources/list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/resources/list",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"resources",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/resources/update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 2,\n    \"resource\": {\n        \"displayName\": \"test\",\n        \"name\": \"test\",\n        \"scopes\": [\n            \"test\",\n            \"test1\"\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/resources/update",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"resources",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/resources/delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/resources/delete",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"resources",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scopes",
+			"item": [
+				{
+					"name": "api/private/configuration/scopes/create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"scope\": {\n        \"displayName\": \"Test\",\n        \"name\": \"test\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/scopes/create",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"scopes",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/scopes/list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/scopes/list",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"scopes",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/scopes/update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"2\",\n    \"scope\": {\n        \"displayName\": \"Test update\",\n        \"name\": \"test-update\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/scopes/update",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"scopes",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/private/configuration/scopes/delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/scopes/delete",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"scopes",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Seed",
+			"item": [
+				{
+					"name": "api/private/configuration/seed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:20000/api/private/configuration/seed",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "20000",
+							"path": [
+								"api",
+								"private",
+								"configuration",
+								"seed"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "connect/token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "authorization-code",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "authorization-code-secret",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"type": "text"
+						},
+						{
+							"key": "code",
+							"value": "5F3B7DC8253699E18E50B010A106131D4B79CC0AA2785F8126D9DDFBE0CC26A1",
+							"type": "text"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "http://localhost:10010",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://localhost:20000/connect/token",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "20000",
+					"path": [
+						"connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

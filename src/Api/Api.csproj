@@ -2,38 +2,38 @@
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <Nullable>disable</Nullable>
+        <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.10" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
+        <PackageReference Include="JetBrains.Annotations" Version="2023.2.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.10"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.10" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.10" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.10"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.10"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Secret\certificate.pfx" />
-        <EmbeddedResource Include="Secret\certificate.pfx" />
+        <None Remove="Secret\certificate.pfx"/>
+        <EmbeddedResource Include="Secret\certificate.pfx"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
-        <ProjectReference Include="..\Migrations\Migrations.csproj" />
+        <ProjectReference Include="..\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj"/>
+        <ProjectReference Include="..\Migrations\Migrations.csproj"/>
     </ItemGroup>
 
 
     <ItemGroup>
-      <Folder Include="Api\Private\Configuration\" />
+        <Folder Include="Api\Private\Configuration\"/>
     </ItemGroup>
 
 </Project>

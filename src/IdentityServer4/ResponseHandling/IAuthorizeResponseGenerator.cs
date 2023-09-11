@@ -3,7 +3,6 @@
 
 
 using IdentityServer4.Validation;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.ResponseHandling
 {

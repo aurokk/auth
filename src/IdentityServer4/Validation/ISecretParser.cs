@@ -4,7 +4,6 @@
 
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation
 {

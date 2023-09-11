@@ -3,7 +3,6 @@
 
 
 using IdentityServer4.Events;
-using System.Threading.Tasks;
 
 namespace IdentityServer4.Services
 {

@@ -7,8 +7,6 @@ using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
-using System.Net.Http;
 using IdentityServer4;
 using IdentityServer4.Configuration;
 using Microsoft.Extensions.Logging;

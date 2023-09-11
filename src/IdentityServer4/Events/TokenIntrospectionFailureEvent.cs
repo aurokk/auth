@@ -3,7 +3,6 @@
 
 
 using IdentityServer4.Extensions;
-using System.Collections.Generic;
 
 namespace IdentityServer4.Events
 {

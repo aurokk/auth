@@ -5,14 +5,11 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
 using IdentityServer4.Configuration.DependencyInjection;
 using IdentityServer4.Extensions;
-using System;
 using IdentityModel;
-using System.Linq;
 using IdentityServer4.Configuration;
 
 namespace IdentityServer4.Hosting

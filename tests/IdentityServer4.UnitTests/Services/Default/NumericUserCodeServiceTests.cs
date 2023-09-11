@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using FluentAssertions;
 using IdentityServer4.Services;
 using Xunit;

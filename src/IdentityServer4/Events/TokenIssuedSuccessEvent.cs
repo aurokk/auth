@@ -6,7 +6,6 @@ using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Validation;
-using System.Collections.Generic;
 using static IdentityServer4.Constants;
 
 namespace IdentityServer4.Events

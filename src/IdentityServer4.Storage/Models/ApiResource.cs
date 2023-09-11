@@ -3,8 +3,6 @@
 
 
 using IdentityServer4.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace IdentityServer4.Models
