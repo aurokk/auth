@@ -3,6 +3,7 @@ using Api;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,11 @@ services
         options => options.ForwardedHeaders =
             ForwardedHeaders.XForwardedProto |
             ForwardedHeaders.XForwardedHost
+    );
+
+services
+    .Configure<ApiBehaviorOptions>(
+        options => options.SuppressInferBindingSourcesForParameters = true
     );
 
 // overrides

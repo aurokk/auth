@@ -17,15 +17,13 @@ public record ClientDataDto(
     bool     AllowOfflineAccess,
     string   ClientId,
     string[] RedirectUris,
-    int      RefreshTokenExpiration,
-    int      RefreshTokenUsage,
+    int      RefreshTokenExpiration, // todo: сделать строки
+    int      RefreshTokenUsage, // todo: сделать строки
     bool     RequireClientSecret,
     bool     RequirePkce,
     int      SlidingRefreshTokenLifetime
 );
-// @formatter:on
 
-// @formatter:off
 [PublicAPI]
 public sealed record ClientDto(
     int      AbsoluteRefreshTokenLifetime,
@@ -35,11 +33,11 @@ public sealed record ClientDto(
     bool     AllowAccessTokensViaBrowser,
     bool     AllowOfflineAccess,
     string   ClientId,
-    int[]    ClientSecrets,
+    // int[]    ClientSecrets,
     int      Id,
     string[] RedirectUris,
-    int      RefreshTokenExpiration,
-    int      RefreshTokenUsage,
+    int      RefreshTokenExpiration, // todo: сделать строки
+    int      RefreshTokenUsage, // todo: сделать строки
     bool     RequireClientSecret,
     bool     RequirePkce,
     int      SlidingRefreshTokenLifetime
@@ -56,17 +54,9 @@ public sealed record ListClientsResponse(
     ClientDto[] Clients
 );
 
-// @formatter:off
 [PublicAPI]
 public sealed record UpdateClientRequest(
-    int           Id,
     ClientDataDto Client
-);
-// @formatter:on
-
-[PublicAPI]
-public sealed record DeleteClientRequest(
-    int Id
 );
 
 public static class Mappers
@@ -104,7 +94,7 @@ public static class Mappers
             AllowAccessTokensViaBrowser: client.AllowAccessTokensViaBrowser,
             AllowOfflineAccess: client.AllowOfflineAccess,
             ClientId: client.ClientId,
-            ClientSecrets: client.ClientSecrets.Select(x => x.Id).ToArray(),
+            // ClientSecrets: client.ClientSecrets.Select(x => x.Id).ToArray(),
             Id: client.Id,
             RedirectUris: client.RedirectUris.Select(x => x.RedirectUri).ToArray(),
             RefreshTokenExpiration: client.RefreshTokenExpiration,
@@ -126,8 +116,10 @@ public class ClientsController : ControllerBase
     public ClientsController(ConfigurationDbContext context) => _context = context;
 
     [HttpPost]
-    [Route("create")]
-    public async Task<IActionResult> CreateClient(CreateClientRequest request, CancellationToken ct)
+    [Route("")]
+    public async Task<IActionResult> CreateClient(
+        [FromBody] CreateClientRequest request,
+        CancellationToken ct)
     {
         var dbClient = request.Client.ToDomain();
         await _context.Clients.AddAsync(dbClient, ct);
@@ -136,11 +128,15 @@ public class ClientsController : ControllerBase
     }
 
     [HttpGet]
-    [Route("list")]
-    public async Task<IActionResult> ListClients(CancellationToken ct)
+    [Route("")]
+    public async Task<IActionResult> ListClients(
+        CancellationToken ct)
     {
         var dbClients = await _context
             .Clients
+            .Include(client => client.AllowedGrantTypes)
+            .Include(client => client.AllowedScopes)
+            .Include(client => client.RedirectUris)
             .AsNoTracking()
             .ToListAsync(ct);
         var aClients = dbClients
@@ -151,15 +147,18 @@ public class ClientsController : ControllerBase
     }
 
     [HttpPut]
-    [Route("update")]
-    public async Task<IActionResult> UpdateClient(UpdateClientRequest request, CancellationToken ct)
+    [Route("{id}")]
+    public async Task<IActionResult> UpdateClient(
+        [FromRoute] int id,
+        [FromBody] UpdateClientRequest request,
+        CancellationToken ct)
     {
         var dbClient = await _context
             .Clients
             .Include(client => client.AllowedGrantTypes)
             .Include(client => client.AllowedScopes)
             .Include(client => client.RedirectUris)
-            .SingleOrDefaultAsync(x => x.Id == request.Id, ct);
+            .SingleOrDefaultAsync(x => x.Id == id, ct);
         if (dbClient == null)
         {
             return BadRequest();
@@ -188,7 +187,7 @@ public class ClientsController : ControllerBase
         dbClient.RedirectUris.RemoveAll(s => !request.Client.RedirectUris.Contains(s.RedirectUri));
         var currRedirectUris = dbClient.RedirectUris.Select(x => x.RedirectUri).ToHashSet();
         var reqRedirectUris = request.Client.RedirectUris.ToHashSet();
-        var newRedirectUris = reqRedirectUris.Except(currRedirectUris).Select(redirectUrl => new ClientRedirectUri() {RedirectUri = redirectUrl,});
+        var newRedirectUris = reqRedirectUris.Except(currRedirectUris).Select(redirectUrl => new ClientRedirectUri {RedirectUri = redirectUrl,});
         dbClient.RedirectUris.AddRange(newRedirectUris);
         //
         dbClient.RefreshTokenExpiration = request.Client.RefreshTokenExpiration;
@@ -203,10 +202,12 @@ public class ClientsController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete")]
-    public async Task<IActionResult> DeleteClients(DeleteClientRequest request, CancellationToken ct)
+    [Route("{id}")]
+    public async Task<IActionResult> DeleteClient(
+        [FromRoute] int id,
+        CancellationToken ct)
     {
-        var dbClient = await _context.Clients.SingleOrDefaultAsync(x => x.Id == request.Id, ct);
+        var dbClient = await _context.Clients.SingleOrDefaultAsync(x => x.Id == id, ct);
         if (dbClient == null)
         {
             return BadRequest();

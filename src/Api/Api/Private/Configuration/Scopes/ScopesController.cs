@@ -31,17 +31,9 @@ public sealed record ListScopesResponse(
     ScopeDto[] Scopes
 );
 
-// @formatter:off
 [PublicAPI]
 public sealed record UpdateScopeRequest(
-    int          Id,
     ScopeDataDto Scope
-);
-// @formatter:on
-
-[PublicAPI]
-public sealed record DeleteScopeRequest(
-    int Id
 );
 
 public static class Mappers
@@ -78,8 +70,10 @@ public class ScopesController : ControllerBase
     public ScopesController(ConfigurationDbContext context) => _context = context;
 
     [HttpPost]
-    [Route("create")]
-    public async Task<IActionResult> CreateScope(CreateScopeRequest request, CancellationToken ct)
+    [Route("")]
+    public async Task<IActionResult> CreateScope(
+        [FromBody] CreateScopeRequest request,
+        CancellationToken ct)
     {
         var dbScope = request.Scope.ToDomain();
         await _context.ApiScopes.AddAsync(dbScope, ct);
@@ -88,8 +82,9 @@ public class ScopesController : ControllerBase
     }
 
     [HttpGet]
-    [Route("list")]
-    public async Task<IActionResult> ListScopes(CancellationToken ct)
+    [Route("")]
+    public async Task<IActionResult> ListScopes(
+        CancellationToken ct)
     {
         var dbScopes = await _context
             .ApiScopes
@@ -103,10 +98,13 @@ public class ScopesController : ControllerBase
     }
 
     [HttpPut]
-    [Route("update")]
-    public async Task<IActionResult> UpdateScope(UpdateScopeRequest request, CancellationToken ct)
+    [Route("{id}")]
+    public async Task<IActionResult> UpdateScope(
+        [FromRoute] int id,
+        [FromBody] UpdateScopeRequest request,
+        CancellationToken ct)
     {
-        var dbScope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Id == request.Id, ct);
+        var dbScope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Id == id, ct);
         if (dbScope == null)
         {
             return BadRequest();
@@ -122,10 +120,12 @@ public class ScopesController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete")]
-    public async Task<IActionResult> DeleteScopes(DeleteScopeRequest request, CancellationToken ct)
+    [Route("{id}")]
+    public async Task<IActionResult> DeleteScope(
+        [FromRoute] int id,
+        CancellationToken ct)
     {
-        var dbScope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Id == request.Id, ct);
+        var dbScope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Id == id, ct);
         if (dbScope == null)
         {
             return BadRequest();

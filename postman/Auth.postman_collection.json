@@ -10,7 +10,128 @@
 			"name": "Clients",
 			"item": [
 				{
-					"name": "api/private/configuration/clients/create",
+					"name": "Secrets",
+					"item": [
+						{
+							"name": "api/private/configuration/clients/{{clientId}}/secrets",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"secret\": {\n        \"description\": \"Test\",\n        \"expiration\": null,\n        \"value\": \"implicit\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:20000/api/private/configuration/clients/{{clientId}}/secrets",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "20000",
+									"path": [
+										"api",
+										"private",
+										"configuration",
+										"clients",
+										"{{clientId}}",
+										"secrets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "api/private/configuration/clients/{{clientId}}/secrets",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:20000/api/private/configuration/clients/{{clientId}}/secrets",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "20000",
+									"path": [
+										"api",
+										"private",
+										"configuration",
+										"clients",
+										"{{clientId}}",
+										"secrets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "api/private/configuration/clients/{{clientId}}/secrets/{{secretId}}",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"secret\": {\n        \"description\": \"Test 3\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:20000/api/private/configuration/clients/{{clientId}}/secrets/{{secretId}}",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "20000",
+									"path": [
+										"api",
+										"private",
+										"configuration",
+										"clients",
+										"{{clientId}}",
+										"secrets",
+										"{{secretId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "api/private/configuration/clients/{{clientId}}/secrets/{{secretId}}",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:20000/api/private/configuration/clients/{{clientId}}/secrets/{{secretId}}",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "20000",
+									"path": [
+										"api",
+										"private",
+										"configuration",
+										"clients",
+										"{{clientId}}",
+										"secrets",
+										"{{secretId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "api/private/configuration/clients",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -24,7 +145,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/clients/create",
+							"raw": "https://localhost:20000/api/private/configuration/clients",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -34,20 +155,19 @@
 								"api",
 								"private",
 								"configuration",
-								"clients",
-								"create"
+								"clients"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/clients/list",
+					"name": "api/private/configuration/clients",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/clients/list",
+							"raw": "https://localhost:20000/api/private/configuration/clients",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -57,21 +177,20 @@
 								"api",
 								"private",
 								"configuration",
-								"clients",
-								"list"
+								"clients"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/clients/update",
+					"name": "api/private/configuration/clients/{{clientId}}",
 					"request": {
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"2\",\n    \"scope\": {\n        \"displayName\": \"Test update\",\n        \"name\": \"test-update\"\n    }\n}",
+							"raw": "{\n    \"scope\": {\n        \"displayName\": \"Test update\",\n        \"name\": \"test-update\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -79,7 +198,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/clients/update",
+							"raw": "https://localhost:20000/api/private/configuration/clients/{{clientId}}",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -90,28 +209,19 @@
 								"private",
 								"configuration",
 								"clients",
-								"update"
+								"{{clientId}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/clients/delete",
+					"name": "api/private/configuration/clients/{{clientId}}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"2\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/clients/delete",
+							"raw": "https://localhost:20000/api/private/configuration/clients/{{clientId}}",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -122,7 +232,7 @@
 								"private",
 								"configuration",
 								"clients",
-								"delete"
+								"{{clientId}}"
 							]
 						}
 					},
@@ -134,7 +244,7 @@
 			"name": "Resources",
 			"item": [
 				{
-					"name": "api/private/configuration/resources/create",
+					"name": "api/private/configuration/resources",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -148,7 +258,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/resources/create",
+							"raw": "https://localhost:20000/api/private/configuration/resources",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -158,20 +268,19 @@
 								"api",
 								"private",
 								"configuration",
-								"resources",
-								"create"
+								"resources"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/resources/list",
+					"name": "api/private/configuration/resources",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/resources/list",
+							"raw": "https://localhost:20000/api/private/configuration/resources",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -181,21 +290,20 @@
 								"api",
 								"private",
 								"configuration",
-								"resources",
-								"list"
+								"resources"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/resources/update",
+					"name": "api/private/configuration/resources/{{scopeId}}",
 					"request": {
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 2,\n    \"resource\": {\n        \"displayName\": \"test\",\n        \"name\": \"test\",\n        \"scopes\": [\n            \"test\",\n            \"test1\"\n        ]\n    }\n}",
+							"raw": "{\n    \"resource\": {\n        \"displayName\": \"test\",\n        \"name\": \"test\",\n        \"scopes\": [\n            \"test\",\n            \"test1\"\n        ]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -203,7 +311,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/resources/update",
+							"raw": "https://localhost:20000/api/private/configuration/resources/{{resourceId}}",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -214,28 +322,19 @@
 								"private",
 								"configuration",
 								"resources",
-								"update"
+								"{{resourceId}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/resources/delete",
+					"name": "api/private/configuration/resources/{{scopeId}}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"2\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/resources/delete",
+							"raw": "https://localhost:20000/api/private/configuration/resources/{{resourceId}}",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -246,7 +345,7 @@
 								"private",
 								"configuration",
 								"resources",
-								"delete"
+								"{{resourceId}}"
 							]
 						}
 					},
@@ -258,7 +357,7 @@
 			"name": "Scopes",
 			"item": [
 				{
-					"name": "api/private/configuration/scopes/create",
+					"name": "api/private/configuration/scopes",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -272,7 +371,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/scopes/create",
+							"raw": "https://localhost:20000/api/private/configuration/scopes",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -282,20 +381,19 @@
 								"api",
 								"private",
 								"configuration",
-								"scopes",
-								"create"
+								"scopes"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/scopes/list",
+					"name": "api/private/configuration/scopes",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/scopes/list",
+							"raw": "https://localhost:20000/api/private/configuration/scopes",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -305,21 +403,20 @@
 								"api",
 								"private",
 								"configuration",
-								"scopes",
-								"list"
+								"scopes"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/scopes/update",
+					"name": "api/private/configuration/scopes/{{scopeId}}",
 					"request": {
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"2\",\n    \"scope\": {\n        \"displayName\": \"Test update\",\n        \"name\": \"test-update\"\n    }\n}",
+							"raw": "{\n    \"scope\": {\n        \"displayName\": \"Test update\",\n        \"name\": \"test-update\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -327,7 +424,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/scopes/update",
+							"raw": "https://localhost:20000/api/private/configuration/scopes/{{scopeId}}",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -338,28 +435,19 @@
 								"private",
 								"configuration",
 								"scopes",
-								"update"
+								"{{scopeId}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "api/private/configuration/scopes/delete",
+					"name": "api/private/configuration/scopes/{{scopeId}}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"2\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "https://localhost:20000/api/private/configuration/scopes/delete",
+							"raw": "https://localhost:20000/api/private/configuration/scopes/{{scopeId}}",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -370,7 +458,7 @@
 								"private",
 								"configuration",
 								"scopes",
-								"delete"
+								"{{scopeId}}"
 							]
 						}
 					},
@@ -454,6 +542,47 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "clientId",
+			"value": "1"
+		},
+		{
+			"key": "secretId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "resourceId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "scopeId",
+			"value": "1",
+			"type": "string"
 		}
 	]
 }

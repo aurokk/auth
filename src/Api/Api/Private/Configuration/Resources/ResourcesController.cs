@@ -13,9 +13,7 @@ public record ResourceDataDto(
     string   Name,
     string[] Scopes
 );
-// @formatter:on
 
-// @formatter:off
 [PublicAPI]
 public sealed record ResourceDto(
     int      Id,
@@ -35,17 +33,9 @@ public sealed record ListResourcesResponse(
     ResourceDto[] Resources
 );
 
-// @formatter:off
 [PublicAPI]
 public sealed record UpdateResourceRequest(
-    int             Id,
     ResourceDataDto Resource
-);
-// @formatter:on
-
-[PublicAPI]
-public sealed record DeleteResourceRequest(
-    int Id
 );
 
 public static class Mappers
@@ -91,8 +81,10 @@ public class ResourcesController : ControllerBase
     }
 
     [HttpPost]
-    [Route("create")]
-    public async Task<IActionResult> CreateResource(CreateResourceRequest request, CancellationToken ct)
+    [Route("")]
+    public async Task<IActionResult> CreateResource(
+        [FromBody] CreateResourceRequest request,
+        CancellationToken ct)
     {
         var dbResource = request.Resource.ToDomain();
         await _context.ApiResources.AddAsync(dbResource, ct);
@@ -101,8 +93,9 @@ public class ResourcesController : ControllerBase
     }
 
     [HttpGet]
-    [Route("list")]
-    public async Task<IActionResult> ListResources(CancellationToken ct)
+    [Route("")]
+    public async Task<IActionResult> ListResources(
+        CancellationToken ct)
     {
         var dbResources = await _context
             .ApiResources
@@ -117,13 +110,16 @@ public class ResourcesController : ControllerBase
     }
 
     [HttpPut]
-    [Route("update")]
-    public async Task<IActionResult> UpdateResource(UpdateResourceRequest request, CancellationToken ct)
+    [Route("{id}")]
+    public async Task<IActionResult> UpdateResource(
+        [FromRoute] int id,
+        [FromBody] UpdateResourceRequest request,
+        CancellationToken ct)
     {
         var dbResource = await _context
             .ApiResources
             .Include(r => r.Scopes)
-            .SingleOrDefaultAsync(x => x.Id == request.Id, ct);
+            .SingleOrDefaultAsync(x => x.Id == id, ct);
 
         if (dbResource == null)
         {
@@ -145,12 +141,14 @@ public class ResourcesController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete")]
-    public async Task<IActionResult> DeleteResources(DeleteResourceRequest request, CancellationToken ct)
+    [Route("{id}")]
+    public async Task<IActionResult> DeleteResource(
+        [FromRoute] int id,
+        CancellationToken ct)
     {
         var dbResource = await _context
             .ApiResources
-            .SingleOrDefaultAsync(x => x.Id == request.Id, ct);
+            .SingleOrDefaultAsync(x => x.Id == id, ct);
 
         if (dbResource == null)
         {
