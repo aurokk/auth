@@ -5,7 +5,7 @@ on:
       - main
     paths:
       - .github/workflows/chart.yml
-      - charts/denji/**
+      - chart/denji/**
 jobs:
   build:
     name: Build & Push
@@ -27,9 +27,9 @@ jobs:
         id: version
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.version' ./charts/${{ env.project }}/Chart.yaml
+          cmd: yq '.version' ./chart/${{ env.project }}/Chart.yaml
       - name: Publish
         run: |
           helm registry login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io/${{ github.repository_owner }}/${{ env.project }}
-          helm package charts/${{ env.project }} -d dist
+          helm package chart/${{ env.project }} -d dist
           helm push dist/${{ env.project }}-${{ steps.version.outputs.result }}.tgz oci://ghcr.io/${{ github.repository_owner }}
