@@ -2,6 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 using Api;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.Stores;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,9 @@ services
     .AddSingleton<ILoginResponseIdToRequestIdMessageStore, LoginResponseIdToRequestIdMessageStore>();
 
 services
+    .AddHealthChecks();
+
+services
     .AddIdentityServer(options =>
     {
         options.Events.RaiseErrorEvents = true;
@@ -124,6 +128,18 @@ application
     .UseIdentityServer()
     .UseAuthentication()
     .UseAuthorization();
+
+application
+    .MapHealthChecks("/health/ready", new HealthCheckOptions
+    {
+        Predicate = healthCheck => healthCheck.Tags.Contains("ready"),
+    });
+
+application
+    .MapHealthChecks("/health/live", new HealthCheckOptions
+    {
+        Predicate = _ => false,
+    });
 
 application
     .MapDefaultControllerRoute();
