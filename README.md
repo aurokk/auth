@@ -1,10 +1,10 @@
-# Auth
+# Denji
 
 ## Build
 
 ```
-docker build -t auth .
-docker run -d --name auth -p20000:80 auth
+docker build -t denji .
+docker run -d --name denji -p20000:80 denji
 docker compose up -d
 docker compose down -v
 ```
