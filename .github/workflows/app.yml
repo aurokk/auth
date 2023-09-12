@@ -1,6 +1,8 @@
-name: main
+name: app
 on:
-  - push
+  push:
+    branches:
+      - main
 jobs:
   build:
     name: Build & Push
