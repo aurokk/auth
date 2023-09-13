@@ -2,6 +2,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Api.Api.Private.LoginCallback;
 
@@ -33,12 +34,15 @@ public class LoginCallbackController : ControllerBase
 {
     private readonly ILoginResponseMessageStore _loginResponseMessageStore;
     private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
+    private readonly ILogger<LoginCallbackController> _logger;
 
     public LoginCallbackController(ILoginResponseMessageStore loginResponseMessageStore,
-        ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore)
+        ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
+        ILogger<LoginCallbackController> logger)
     {
         _loginResponseMessageStore = loginResponseMessageStore;
         _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -46,6 +50,8 @@ public class LoginCallbackController : ControllerBase
     [ProducesResponseType(typeof(AcceptResponse), 200)]
     public async Task<IActionResult> Accept(AcceptRequest request, CancellationToken ct)
     {
+        _logger.LogInformation("Request {Request}", JsonConvert.SerializeObject(request));
+
         var id = request.LoginRequestId;
         if (string.IsNullOrWhiteSpace(id))
         {
