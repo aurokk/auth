@@ -23,7 +23,7 @@ public class ConsentCallbackController : ControllerBase
 
     [HttpPost]
     [Route("accept")]
-    public async Task<IActionResult> Accept(AcceptRequest request, CancellationToken ct)
+    public async Task<IActionResult> Accept([FromBody] AcceptRequest request, CancellationToken ct)
     {
         await Task.CompletedTask;
         return Problem();
@@ -31,7 +31,7 @@ public class ConsentCallbackController : ControllerBase
 
     [HttpPost]
     [Route("reject")]
-    public async Task<IActionResult> Reject(RejectRequest request, CancellationToken ct)
+    public async Task<IActionResult> Reject([FromBody] RejectRequest request, CancellationToken ct)
     {
         await Task.CompletedTask;
         return Problem();

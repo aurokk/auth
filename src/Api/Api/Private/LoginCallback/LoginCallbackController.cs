@@ -48,7 +48,7 @@ public class LoginCallbackController : ControllerBase
     [HttpPost]
     [Route("accept")]
     [ProducesResponseType(typeof(AcceptResponse), 200)]
-    public async Task<IActionResult> Accept(AcceptRequest request, CancellationToken ct)
+    public async Task<IActionResult> Accept([FromBody] AcceptRequest request, CancellationToken ct)
     {
         _logger.LogInformation("Request {Request}", JsonConvert.SerializeObject(request));
 
@@ -83,7 +83,7 @@ public class LoginCallbackController : ControllerBase
     [HttpPost]
     [Route("reject")]
     [ProducesResponseType(typeof(RejectResponse), 200)]
-    public async Task<IActionResult> Reject(RejectRequest request, CancellationToken ct)
+    public async Task<IActionResult> Reject([FromBody] RejectRequest request, CancellationToken ct)
     {
         var id = request.LoginRequestId;
         if (string.IsNullOrWhiteSpace(id))
