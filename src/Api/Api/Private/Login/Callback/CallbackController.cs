@@ -30,15 +30,15 @@ public sealed record RejectResponse(
 [ApiExplorerSettings(GroupName = SwaggerPrivateExtensions.Name)]
 [ApiController]
 [Route("api/private/login/callback")]
-public class LoginCallbackController : ControllerBase
+public class CallbackController : ControllerBase
 {
     private readonly ILoginResponseMessageStore _loginResponseMessageStore;
     private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
-    private readonly ILogger<LoginCallbackController> _logger;
+    private readonly ILogger<CallbackController> _logger;
 
-    public LoginCallbackController(ILoginResponseMessageStore loginResponseMessageStore,
+    public CallbackController(ILoginResponseMessageStore loginResponseMessageStore,
         ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
-        ILogger<LoginCallbackController> logger)
+        ILogger<CallbackController> logger)
     {
         _loginResponseMessageStore = loginResponseMessageStore;
         _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;

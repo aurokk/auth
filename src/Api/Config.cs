@@ -11,7 +11,7 @@ public static class Config
             {
                 Description = "Description",
                 DisplayName = "Read access to Protected Resource",
-                Name = "protected-resource.read",
+                Name = "beam.read",
             },
         };
 
@@ -22,8 +22,8 @@ public static class Config
             {
                 Description = "Description",
                 DisplayName = "Protected Resource",
-                Name = "protected-resource",
-                Scopes = { "protected-resource.read", },
+                Name = "beam",
+                Scopes = { "beam.read", },
             },
         };
 
@@ -34,18 +34,21 @@ public static class Config
             {
                 AccessTokenLifetime = 1 * 24 * 60 * 60, // 1 day
                 AllowedGrantTypes = { GrantType.Implicit, },
-                AllowedScopes = { "protected-resource.read", },
+                AllowedScopes = { "beam.read", },
                 AllowAccessTokensViaBrowser = true,
                 AllowOfflineAccess = false,
+                AllowRememberConsent = true,
                 ClientId = "implicit",
+                ConsentLifetime = null,
                 RedirectUris = { "http://localhost:10000", },
+                RequireConsent = true,
             },
             new Client
             {
                 AbsoluteRefreshTokenLifetime = 0,
                 AccessTokenLifetime = 1 * 24 * 60 * 60, // 1 day
                 AllowedGrantTypes = { GrantType.AuthorizationCode, },
-                AllowedScopes = { "protected-resource.read", },
+                AllowedScopes = { "beam.read", },
                 AllowAccessTokensViaBrowser = false,
                 AllowOfflineAccess = true,
                 ClientId = "authorization-code",

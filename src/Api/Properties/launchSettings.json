@@ -8,7 +8,8 @@
       "applicationUrl": "https://localhost:20000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Database__ConnectionString": "Host=localhost;Port=20002;Username=auth;Password=auth;Database=auth;",
+        "Cors__Origins__0": "http://localhost:20020",
+        "Database__ConnectionString": "Host=localhost;Port=20002;Username=denji;Password=denji;Database=denji;",
         "IdentityUI__BaseUrl": "http://localhost:20020",
         "MODE": "WEB"
       }
@@ -19,7 +20,7 @@
       "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Database__ConnectionString": "Host=localhost;Port=20002;Username=auth;Password=auth;Database=auth;",
+        "Database__ConnectionString": "Host=localhost;Port=20002;Username=denji;Password=denji;Database=denji;",
         "MODE": "MIGRATOR"
       }
     }

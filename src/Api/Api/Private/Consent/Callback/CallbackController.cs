@@ -12,11 +12,11 @@ public sealed record RejectRequest();
 
 [ApiController]
 [Route("api/private/consent/callback")]
-public class ConsentCallbackController : ControllerBase
+public class CallbackController : ControllerBase
 {
     private readonly IConsentResponseMessageStore _consentResponseMessageStore;
 
-    public ConsentCallbackController(IConsentResponseMessageStore consentResponseMessageStore)
+    public CallbackController(IConsentResponseMessageStore consentResponseMessageStore)
     {
         _consentResponseMessageStore = consentResponseMessageStore;
     }
