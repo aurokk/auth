@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var configuration = builder.Configuration;
 var services = builder.Services;
 
 // var applicationSettingsDto = new ApplicationConfigurationDto();
@@ -49,6 +48,21 @@ var secretBytes = await ResourcesHelper.GetResourceBytes("Secret.certificate.pfx
 var secret = new X509Certificate2(secretBytes);
 
 services
+    .AddCors(options =>
+    {
+        var configuration = builder.Configuration;
+        var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? throw new Exception();
+        options
+            .AddDefaultPolicy(policy =>
+                policy
+                    .WithOrigins(origins)
+                    .AllowCredentials()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+            );
+    });
+
+services
     .Configure<ForwardedHeadersOptions>(
         options => options.ForwardedHeaders =
             ForwardedHeaders.XForwardedProto |
@@ -80,11 +94,12 @@ services
 
         options.EmitStaticAudienceClaim = true;
 
-        var identityBaseUrl = configuration.GetValue<string>("IdentityUI:BaseUrl") ?? "http://empty";
-        var identityBaseUri = new Uri(identityBaseUrl);
-        options.UserInteraction.LoginUrl = new Uri(identityBaseUri, "login").AbsoluteUri;
-        options.UserInteraction.LogoutUrl = new Uri(identityBaseUri, "logout").AbsoluteUri;
-        options.UserInteraction.ConsentUrl = new Uri(identityBaseUri, "consent").AbsoluteUri;
+        var configuration = builder.Configuration;
+        var cosmoBaseUrl = configuration.GetValue<string>("Cosmo:BaseUrl") ?? "http://empty";
+        var cosmoBaseUri = new Uri(cosmoBaseUrl);
+        options.UserInteraction.LoginUrl = new Uri(cosmoBaseUri, "login").AbsoluteUri;
+        options.UserInteraction.LogoutUrl = new Uri(cosmoBaseUri, "logout").AbsoluteUri;
+        options.UserInteraction.ConsentUrl = new Uri(cosmoBaseUri, "consent").AbsoluteUri;
     })
     .AddSigningCredential(secret)
     // .AddInMemoryApiScopes(Config.ApiScopes)
@@ -95,6 +110,7 @@ services
     {
         options.ConfigureDbContext = dbContextBuilder =>
         {
+            var configuration = builder.Configuration;
             var connectionString = configuration.GetValue<string>("Database:ConnectionString");
             dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
         };
@@ -103,6 +119,7 @@ services
     {
         options.ConfigureDbContext = dbContextBuilder =>
         {
+            var configuration = builder.Configuration;
             var connectionString = configuration.GetValue<string>("Database:ConnectionString");
             dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
         };
@@ -125,6 +142,7 @@ application
     .UseForwardedHeaders()
     .UseStaticFiles()
     .UseRouting()
+    .UseCors()
     .UseIdentityServer()
     .UseAuthentication()
     .UseAuthorization();
@@ -144,22 +162,25 @@ application
 application
     .MapDefaultControllerRoute();
 
-var mode = configuration.GetValue<string?>("MODE");
-switch (mode)
 {
-    case "MIGRATOR":
+    var configuration = builder.Configuration;
+    var mode = configuration.GetValue<string?>("MODE");
+    switch (mode)
     {
-        using var scope = application.Services.CreateScope();
-        var pgc = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
-        await pgc.Database.MigrateAsync();
-        var cc = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-        await cc.Database.MigrateAsync();
-        return;
-    }
+        case "MIGRATOR":
+        {
+            using var scope = application.Services.CreateScope();
+            var pgc = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
+            await pgc.Database.MigrateAsync();
+            var cc = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+            await cc.Database.MigrateAsync();
+            return;
+        }
 
-    default:
-    {
-        await application.RunAsync();
-        return;
+        default:
+        {
+            await application.RunAsync();
+            return;
+        }
     }
 }

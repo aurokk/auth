@@ -24,6 +24,7 @@ public class SeedController : ControllerBase
         await _configurationDbContext.ApiResources.AddRangeAsync(Config.ApiResources.Select(r => r.ToEntity()), ct);
         await _configurationDbContext.ApiScopes.AddRangeAsync(Config.ApiScopes.Select(s => s.ToEntity()), ct);
         await _configurationDbContext.Clients.AddRangeAsync(Config.Clients.Select(c => c.ToEntity()), ct);
+        // await _configurationDbContext.IdentityResources
         await _configurationDbContext.SaveChangesAsync(ct);
         return Ok();
     }
