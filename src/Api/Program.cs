@@ -51,7 +51,7 @@ services
     .AddCors(options =>
     {
         var configuration = builder.Configuration;
-        var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? throw new Exception();
+        var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? throw new Exception();
         options
             .AddDefaultPolicy(policy =>
                 policy
@@ -95,11 +95,11 @@ services
         options.EmitStaticAudienceClaim = true;
 
         var configuration = builder.Configuration;
-        var identityBaseUrl = configuration.GetValue<string>("IdentityUI:BaseUrl") ?? "http://empty";
-        var identityBaseUri = new Uri(identityBaseUrl);
-        options.UserInteraction.LoginUrl = new Uri(identityBaseUri, "login").AbsoluteUri;
-        options.UserInteraction.LogoutUrl = new Uri(identityBaseUri, "logout").AbsoluteUri;
-        options.UserInteraction.ConsentUrl = new Uri(identityBaseUri, "consent").AbsoluteUri;
+        var cosmoBaseUrl = configuration.GetValue<string>("Cosmo:BaseUrl") ?? "http://empty";
+        var cosmoBaseUri = new Uri(cosmoBaseUrl);
+        options.UserInteraction.LoginUrl = new Uri(cosmoBaseUri, "login").AbsoluteUri;
+        options.UserInteraction.LogoutUrl = new Uri(cosmoBaseUri, "logout").AbsoluteUri;
+        options.UserInteraction.ConsentUrl = new Uri(cosmoBaseUri, "consent").AbsoluteUri;
     })
     .AddSigningCredential(secret)
     // .AddInMemoryApiScopes(Config.ApiScopes)

@@ -9,8 +9,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Cors__Origins__0": "http://localhost:20020",
+        "Cosmo__BaseUrl": "http://localhost:20020",
         "Database__ConnectionString": "Host=localhost;Port=20002;Username=denji;Password=denji;Database=denji;",
-        "IdentityUI__BaseUrl": "http://localhost:20020",
         "MODE": "WEB"
       }
     },
