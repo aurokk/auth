@@ -2,6 +2,9 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
 WORKDIR /source
 COPY *.sln                                                                   .
+COPY Directory.Build.props                                                   .
+COPY Directory.Packages.props                                                .
+COPY global.json                                                             .
 COPY src/Api/*.csproj                                                        ./src/Api/
 COPY src/Migrations/*.csproj                                                 ./src/Migrations/
 COPY src/IdentityServer4/*.csproj                                            ./src/IdentityServer4/
