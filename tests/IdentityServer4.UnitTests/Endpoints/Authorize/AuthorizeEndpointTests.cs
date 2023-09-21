@@ -11,6 +11,7 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Endpoints;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Models;
+using IdentityServer4.UnitTests.Common;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -53,6 +54,9 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
 
         private MockLoginResponseIdToRequestIdMessageStore _mockLoginResponseIdToRequestIdMessageStore =
             new MockLoginResponseIdToRequestIdMessageStore();
+
+        private MockStore _mockStore =
+            new MockStore();
 
         private AuthorizeEndpoint _subject;
 
@@ -123,7 +127,8 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 _stubAuthorizeResponseGenerator,
                 _mockUserSession,
                 _mockLoginRequestIdToResponseIdMessageStore,
-                _mockLoginResponseIdToRequestIdMessageStore
+                _mockLoginResponseIdToRequestIdMessageStore,
+                _mockStore
             );
         }
     }

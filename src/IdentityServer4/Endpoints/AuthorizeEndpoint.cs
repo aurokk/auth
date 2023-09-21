@@ -10,6 +10,7 @@ using IdentityServer4.Hosting;
 using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
+using IdentityServer4.Storage.Stores;
 using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,7 @@ namespace IdentityServer4.Endpoints
     {
         private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
         private readonly ILoginResponseIdToRequestIdMessageStore _loginResponseIdToRequestIdMessageStore;
+        private readonly IStore _store;
 
         public AuthorizeEndpoint(
             IEventService events,
@@ -30,17 +32,21 @@ namespace IdentityServer4.Endpoints
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession, ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
-            ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore)
+            ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore,
+            IStore store)
             : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession)
         {
             _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
             _loginResponseIdToRequestIdMessageStore = loginResponseIdToRequestIdMessageStore;
+            _store = store;
         }
 
         public override async Task<IEndpointResult> ProcessAsync(HttpContext context)
         {
             Logger.LogDebug("Start authorize request");
 
+            // TODO:
+            // – перенести парсинг параметров в отдельный класс
             NameValueCollection parameters;
 
             if (HttpMethods.IsGet(context.Request.Method))
@@ -66,7 +72,25 @@ namespace IdentityServer4.Endpoints
 
             if (user == null)
             {
-                // TODO: переписать нормально
+                // TODO:
+                // + разобраться как будет связан response и request
+                // – сохранить в бд объект запроса
+                // – сделать типизированныq стор loginRequest
+                // – сделать типизированныq стор loginResponse
+                // – сделать типизированныq стор consentRequest
+                // – сделать типизированныq стор consentResponse
+                // – сделать миграцию (чистовую)
+                // – сделать клинап
+                // – удалить старые сторы
+
+                var loginRequest = new StoreItem(
+                    Key: "Key",
+                    Value: "Value",
+                    CreatedAtUtc: DateTime.UtcNow,
+                    RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
+                );
+                await _store.Create(loginRequest, context.RequestAborted);
+                
 
                 var loginResponseId = Guid.NewGuid().ToString();
 
@@ -84,9 +108,6 @@ namespace IdentityServer4.Endpoints
                     loginResponseId, loginResponseIdToRequestIdMessage);
             }
 
-
-            // Тут интересно то, что как бы логин проверяется (через куку), а консент не проверяется
-            // Т.е. всегда будет редирект на консент, хотя он уже может быть
             var result = await ProcessAuthorizeRequestAsync(parameters, user, null, loginRequestId);
 
             Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");
