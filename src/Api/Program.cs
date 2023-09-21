@@ -51,7 +51,7 @@ services
     .AddCors(options =>
     {
         var configuration = builder.Configuration;
-        var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? new Array.Empty<string>();
+        var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? new string[0];
         options
             .AddDefaultPolicy(policy =>
                 policy
