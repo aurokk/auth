@@ -192,7 +192,7 @@ namespace IdentityServer4.Validation
                                             ResponseType == OidcConstants.ResponseTypes.CodeToken ||
                                             ResponseType == OidcConstants.ResponseTypes.CodeIdTokenToken;
 
-        public string LoginRequestId { get; set; }
+        // public string LoginRequestId { get; set; }
 
 
         /// <summary>

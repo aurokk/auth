@@ -1,6 +1,9 @@
 using System.Security.Cryptography.X509Certificates;
 using Api;
 using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Storage.DbContexts;
+using IdentityServer4.EntityFramework.Storage.Stores;
+using IdentityServer4.Storage.Stores;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -124,6 +127,18 @@ services
             dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
         };
     });
+
+services
+    .AddScoped<IStore, Store>()
+    .AddScoped<ILoginRequestStore, LoginRequestStore>()
+    .AddScoped<ILoginResponseStore, LoginResponseStore>()
+    .AddDbContext<OperationalDbContext>(dbContextBuilder =>
+    {
+        var configuration = builder.Configuration;
+        var connectionString = configuration.GetValue<string>("Database:ConnectionString");
+        dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
+    });
+
 // .AddAspNetIdentity<ApplicationUser>()
 // .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
 // .AddExtensionGrantValidator<CustomSignInWithAppleGrantValidator>();
@@ -174,6 +189,8 @@ application
             await pgc.Database.MigrateAsync();
             var cc = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
             await cc.Database.MigrateAsync();
+            var oc = scope.ServiceProvider.GetRequiredService<OperationalDbContext>();
+            await oc.Database.MigrateAsync();
             return;
         }
 

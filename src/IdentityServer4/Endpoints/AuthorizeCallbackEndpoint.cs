@@ -3,6 +3,7 @@
 
 using System.Collections.Specialized;
 using System.Net;
+using System.Web;
 using IdentityServer4.Configuration;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Extensions;
@@ -10,6 +11,7 @@ using IdentityServer4.Hosting;
 using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
+using IdentityServer4.Storage.Stores;
 using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authentication;
@@ -24,6 +26,8 @@ namespace IdentityServer4.Endpoints
         private readonly IConsentResponseMessageStore _consentResponseResponseStore;
         private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
         private readonly ILoginResponseIdToRequestIdMessageStore _loginResponseIdToRequestIdMessageStore;
+        private readonly ILoginRequestStore _loginRequestStore;
+        private readonly ILoginResponseStore _loginResponseStore;
 
         public AuthorizeCallbackEndpoint(
             IEventService events,
@@ -36,12 +40,16 @@ namespace IdentityServer4.Endpoints
             IConsentResponseMessageStore consentResponseResponseStore,
             ILoginResponseMessageStore loginResponseMessageStore,
             ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore,
+            ILoginRequestStore loginRequestStore, ILoginResponseStore loginResponseStore,
             IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession)
+            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession,
+                loginRequestStore)
         {
             _consentResponseResponseStore = consentResponseResponseStore;
             _loginResponseMessageStore = loginResponseMessageStore;
             _loginResponseIdToRequestIdMessageStore = loginResponseIdToRequestIdMessageStore;
+            _loginRequestStore = loginRequestStore;
+            _loginResponseStore = loginResponseStore;
             _authorizationParametersMessageStore = authorizationParametersMessageStore;
         }
 
@@ -55,7 +63,39 @@ namespace IdentityServer4.Endpoints
 
             Logger.LogDebug("Start authorize callback request");
 
-            var parameters = context.Request.Query.AsNameValueCollection();
+            var query = context.Request.Query.AsNameValueCollection();
+            var parameters = new NameValueCollection();
+            if (query["loginResponseId"] != null)
+            {
+                if (!Guid.TryParse(query["loginResponseId"], out var loginResponseId))
+                {
+                    return new StatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                var loginResponse = await _loginResponseStore.Get(loginResponseId, context.RequestAborted);
+                var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
+                parameters = HttpUtility.ParseQueryString(loginRequest.Data);
+            }
+
+            if (query["consentResponseId"] != null)
+            {
+                if (!Guid.TryParse(query["consentResponseId"], out var loginResponseId))
+                {
+                    return new StatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                // var loginResponse = await _loginResponseStore.Get(loginResponseId, context.RequestAborted);
+                // var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
+                // parameters = HttpUtility.ParseQueryString(loginRequest.Data);
+                throw new NotImplementedException();
+            }
+
+            if (query["loginResponseId"] == null && query["consentResponseId"] == null)
+            {
+                parameters = query;
+            }
+
+            // var parameters = _loginRequestStore.Get()
             if (_authorizationParametersMessageStore != null)
             {
                 // TODO: поисследовать че за мессадж стор
@@ -67,39 +107,23 @@ namespace IdentityServer4.Endpoints
             }
 
             var user = await UserSession.GetUserAsync();
-
-            var loginResponseId = parameters["loginResponseId"];
-            if (user == null)
+            if (user == null && query["loginResponseId"] != null)
             {
-                // TODO: переписать нормально
-                if (loginResponseId == null)
+                if (!Guid.TryParse(query["loginResponseId"], out var loginResponseId))
                 {
-                    return await CreateErrorResultAsync("missing loginResponseId");
+                    return new StatusCodeResult(HttpStatusCode.BadRequest);
                 }
 
-                var loginResponseIdToRequestIdMessage =
-                    await _loginResponseIdToRequestIdMessageStore.ReadAsync(loginResponseId);
-                if (loginResponseIdToRequestIdMessage == null)
-                {
-                    return await CreateErrorResultAsync("unknown loginResponseId");
-                }
+                var loginResponse = await _loginResponseStore.Get(loginResponseId, context.RequestAborted);
 
-                var loginResponseMessage = await _loginResponseMessageStore.ReadAsync(loginResponseId);
-                if (loginResponseMessage == null)
+                var identityServerUser = new IdentityServerUser(loginResponse.SubjectId)
                 {
-                    return await CreateErrorResultAsync("missing loginResponseId");
-                }
-
-                {
-                    var identityServerUser = new IdentityServerUser(loginResponseMessage.Data.SubjectId)
-                    {
-                        IdentityProvider = "identity", // TODO
-                        AuthenticationTime =  DateTime.UtcNow, // TODO
-                    };
-                    await context.SignInAsync(identityServerUser, new AuthenticationProperties { IsPersistent = true });
-                    context.User = identityServerUser.CreatePrincipal();
-                    user = context.User;
-                }
+                    IdentityProvider = "identity", // TODO
+                    AuthenticationTime = DateTime.UtcNow, // TODO
+                };
+                await context.SignInAsync(identityServerUser, new AuthenticationProperties { IsPersistent = true });
+                context.User = identityServerUser.CreatePrincipal();
+                user = context.User;
             }
 
             var consentRequest = new ConsentRequest(parameters, user?.GetSubjectId());
@@ -111,7 +135,7 @@ namespace IdentityServer4.Endpoints
 
             try
             {
-                var result = await ProcessAuthorizeRequestAsync(parameters, user, consentResult?.Data, loginResponseId);
+                var result = await ProcessAuthorizeRequestAsync(parameters, user, consentResult?.Data);
 
                 Logger.LogTrace("End Authorize Request. Result type: {0}", result?.GetType().ToString() ?? "-none-");
 

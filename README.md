@@ -41,7 +41,8 @@ Denji это OAuth 2.0 и OpenID Connect сервер.
 В проекте есть два контекста для работы с базой данных:
 
 1. `ConfigurationDbContext` — контекст для работы с ресурсами, скоупами, клиентами и тд.
-2. `PersistedGrantDbContext` — контекст для работы с операционными данными, токенами и прочим.
+1. `PersistedGrantDbContext` — контекст для работы с операционными данными, токенами и прочим.
+1. `OperationalDbContext` — контекст для работы с операционными данными.
 
 Чтобы создать миграцию в `ConfigurationDbContext`:
 
@@ -59,6 +60,16 @@ dotnet ef migrations add Test \
 dotnet ef migrations add Initial \
 -o Migrations/PersistedGrant \
 --context PersistedGrantDbContext \
+--project src/Migrations \
+--startup-project src/Api
+```
+
+Чтобы создать миграцию в `OperationalDbContext`:
+
+```
+dotnet ef migrations add Initial \
+-o Migrations/Operational \
+--context OperationalDbContext \
 --project src/Migrations \
 --startup-project src/Api
 ```

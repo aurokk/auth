@@ -34,7 +34,7 @@ namespace IdentityServer4.Endpoints.Results
         internal LoginPageResult(
             ValidatedAuthorizeRequest request,
             IdentityServerOptions options,
-            IAuthorizationParametersMessageStore authorizationParametersMessageStore = null) 
+            IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
             : this(request)
         {
             _options = options;
@@ -47,7 +47,9 @@ namespace IdentityServer4.Endpoints.Results
         private void Init(HttpContext context)
         {
             _options = _options ?? context.RequestServices.GetRequiredService<IdentityServerOptions>();
-            _authorizationParametersMessageStore = _authorizationParametersMessageStore ?? context.RequestServices.GetService<IAuthorizationParametersMessageStore>();
+            _authorizationParametersMessageStore = _authorizationParametersMessageStore ??
+                                                   context.RequestServices
+                                                       .GetService<IAuthorizationParametersMessageStore>();
         }
 
         /// <summary>
@@ -59,12 +61,14 @@ namespace IdentityServer4.Endpoints.Results
         {
             Init(context);
 
-            var returnUrl = context.GetIdentityServerBasePath().EnsureTrailingSlash() + Constants.ProtocolRoutePaths.AuthorizeCallback;
+            var returnUrl = context.GetIdentityServerBasePath().EnsureTrailingSlash() +
+                            Constants.ProtocolRoutePaths.AuthorizeCallback;
             if (_authorizationParametersMessageStore != null)
             {
                 var msg = new Message<IDictionary<string, string[]>>(_request.Raw.ToFullDictionary());
                 var id = await _authorizationParametersMessageStore.WriteAsync(msg);
-                returnUrl = returnUrl.AddQueryString(Constants.AuthorizationParamsStore.MessageStoreIdParameterName, id);
+                returnUrl = returnUrl.AddQueryString(Constants.AuthorizationParamsStore.MessageStoreIdParameterName,
+                    id);
             }
             else
             {
@@ -80,7 +84,7 @@ namespace IdentityServer4.Endpoints.Results
             }
 
             var url = loginUrl.AddQueryString(_options.UserInteraction.LoginReturnUrlParameter, returnUrl);
-                url = url.AddQueryString("loginRequestId", _request.LoginRequestId);
+            // url = url.AddQueryString("loginRequestId", _request.LoginRequestId);
 
             context.Response.RedirectToAbsoluteUrl(url);
         }

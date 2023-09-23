@@ -13,6 +13,8 @@ using IdentityServer4.Hosting;
 using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
+using IdentityServer4.Storage.Stores;
+using IdentityServer4.UnitTests.Common;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -40,7 +42,13 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
 
         private StubAuthorizeResponseGenerator _stubAuthorizeResponseGenerator = new StubAuthorizeResponseGenerator();
 
-        private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator = new StubAuthorizeInteractionResponseGenerator();
+        private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator =
+            new StubAuthorizeInteractionResponseGenerator();
+
+        private MockStore _store = new MockStore();
+
+        private MockLoginRequestStore _mockLoginRequestStore =
+            new MockLoginRequestStore();
 
         private TestAuthorizeEndpoint _subject;
 
@@ -65,7 +73,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
             _stubAuthorizeRequestValidator.Result.IsError = true;
             _stubAuthorizeRequestValidator.Result.Error = "login_required";
 
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<AuthorizeResult>();
             ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
@@ -79,7 +87,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
             _stubAuthorizeRequestValidator.Result.IsError = true;
             _stubAuthorizeRequestValidator.Result.Error = "some_error";
 
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<AuthorizeResult>();
             ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
@@ -91,7 +99,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         {
             _stubInteractionGenerator.Response.IsConsent = true;
 
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<ConsentPageResult>();
         }
@@ -102,7 +110,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         {
             _stubInteractionGenerator.Response.Error = "error";
 
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<AuthorizeResult>();
             ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
@@ -114,12 +122,12 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         {
             var errorDescription = "some error description";
 
-             _stubInteractionGenerator.Response.Error = "error";
+            _stubInteractionGenerator.Response.Error = "error";
             _stubInteractionGenerator.Response.ErrorDescription = errorDescription;
 
-             var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
-             result.Should().BeOfType<AuthorizeResult>();
+            result.Should().BeOfType<AuthorizeResult>();
             var authorizeResult = ((AuthorizeResult)result);
             authorizeResult.Response.IsError.Should().BeTrue();
             authorizeResult.Response.ErrorDescription.Should().Be(errorDescription);
@@ -131,7 +139,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         {
             _stubInteractionGenerator.Response.IsLogin = true;
 
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<LoginPageResult>();
         }
@@ -143,7 +151,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
             _mockUserSession.User = _user;
             _stubInteractionGenerator.Response.RedirectUrl = "http://foo.com";
 
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<CustomRedirectResult>();
         }
@@ -152,7 +160,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         [Trait("Category", Category)]
         public async Task successful_authorization_request_should_generate_authorize_result()
         {
-            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null, "loginRequestId");
+            var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, null);
 
             result.Should().BeOfType<AuthorizeResult>();
         }
@@ -186,20 +194,23 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 _stubAuthorizeRequestValidator,
                 _stubInteractionGenerator,
                 _stubAuthorizeResponseGenerator,
-                _mockUserSession);
+                _mockUserSession,
+                _mockLoginRequestStore);
         }
 
         internal class TestAuthorizeEndpoint : AuthorizeEndpointBase
         {
             public TestAuthorizeEndpoint(
-              IEventService events,
-              ILogger<TestAuthorizeEndpoint> logger,
-              IdentityServerOptions options,
-              IAuthorizeRequestValidator validator,
-              IAuthorizeInteractionResponseGenerator interactionGenerator,
-              IAuthorizeResponseGenerator authorizeResponseGenerator,
-              IUserSession userSession)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession)
+                IEventService events,
+                ILogger<TestAuthorizeEndpoint> logger,
+                IdentityServerOptions options,
+                IAuthorizeRequestValidator validator,
+                IAuthorizeInteractionResponseGenerator interactionGenerator,
+                IAuthorizeResponseGenerator authorizeResponseGenerator,
+                IUserSession userSession,
+                ILoginRequestStore loginRequestStore)
+                : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator,
+                    userSession, loginRequestStore)
             {
             }
 

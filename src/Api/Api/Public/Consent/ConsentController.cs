@@ -40,6 +40,7 @@ public class ConsentController : ControllerBase
         [FromQuery] string returnUrl,
         CancellationToken ct)
     {
+        // тут надо костыльнуть
         var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
 
         var apiScopes = request.ValidatedResources.Resources.ApiScopes

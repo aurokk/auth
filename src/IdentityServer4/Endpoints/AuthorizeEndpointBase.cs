@@ -13,6 +13,7 @@ using IdentityServer4.Logging.Models;
 using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
+using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -22,22 +23,20 @@ namespace IdentityServer4.Endpoints
     internal abstract class AuthorizeEndpointBase : IEndpointHandler
     {
         private readonly IAuthorizeResponseGenerator _authorizeResponseGenerator;
-
         private readonly IEventService _events;
         private readonly IdentityServerOptions _options;
-
         private readonly IAuthorizeInteractionResponseGenerator _interactionGenerator;
-
         private readonly IAuthorizeRequestValidator _validator;
+        private readonly ILoginRequestStore _loginRequestStore;
 
-        protected AuthorizeEndpointBase(
-            IEventService events,
+        protected AuthorizeEndpointBase(IEventService events,
             ILogger<AuthorizeEndpointBase> logger,
             IdentityServerOptions options,
             IAuthorizeRequestValidator validator,
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
-            IUserSession userSession)
+            IUserSession userSession,
+            ILoginRequestStore loginRequestStore)
         {
             _events = events;
             _options = options;
@@ -46,6 +45,7 @@ namespace IdentityServer4.Endpoints
             _interactionGenerator = interactionGenerator;
             _authorizeResponseGenerator = authorizeResponseGenerator;
             UserSession = userSession;
+            _loginRequestStore = loginRequestStore;
         }
 
         protected ILogger Logger { get; private set; }
@@ -55,10 +55,9 @@ namespace IdentityServer4.Endpoints
         public abstract Task<IEndpointResult> ProcessAsync(HttpContext context);
 
         internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(
-            NameValueCollection parameters, 
-            ClaimsPrincipal user, 
-            ConsentResponse consent,
-            string loginRequestId)
+            NameValueCollection parameters,
+            ClaimsPrincipal user,
+            ConsentResponse consent)
         {
             if (user != null)
             {
@@ -81,23 +80,34 @@ namespace IdentityServer4.Endpoints
             }
 
             var request = result.ValidatedRequest;
-            request.LoginRequestId = loginRequestId;
             LogRequest(request);
 
             // determine user interaction
             var interactionResult = await _interactionGenerator.ProcessInteractionAsync(request, consent);
             if (interactionResult.IsError)
             {
-                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, interactionResult.ErrorDescription, false);
+                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error,
+                    interactionResult.ErrorDescription, false);
             }
+
             if (interactionResult.IsLogin)
             {
+                var loginRequest = new IdentityServer4.Storage.Stores.LoginRequest(
+                    Id: Guid.NewGuid(),
+                    Data: parameters.ToQueryString(),
+                    CreatedAtUtc: DateTime.UtcNow,
+                    RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
+                );
+                await _loginRequestStore.Create(loginRequest, CancellationToken.None);
+                return new LoginPageResult2(_options, loginRequest.Id);
                 return new LoginPageResult(request);
             }
+
             if (interactionResult.IsConsent)
             {
                 return new ConsentPageResult(request);
             }
+
             if (interactionResult.IsRedirect)
             {
                 return new CustomRedirectResult(request, interactionResult.RedirectUrl);
@@ -126,7 +136,8 @@ namespace IdentityServer4.Endpoints
 
             if (request != null)
             {
-                var details = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
+                var details =
+                    new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
                 Logger.LogInformation("{@validationDetails}", details);
             }
 
@@ -144,7 +155,8 @@ namespace IdentityServer4.Endpoints
 
         private void LogRequest(ValidatedAuthorizeRequest request)
         {
-            var details = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
+            var details =
+                new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
             Logger.LogDebug(nameof(ValidatedAuthorizeRequest) + Environment.NewLine + "{@validationDetails}", details);
         }
 
@@ -161,15 +173,20 @@ namespace IdentityServer4.Endpoints
 
             if (response.IdentityToken != null)
             {
-                Logger.LogTrace("Identity token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.IdentityToken);
+                Logger.LogTrace("Identity token issued for {clientId} / {subjectId}: {token}", clientId, subjectId,
+                    response.IdentityToken);
             }
+
             if (response.Code != null)
             {
-                Logger.LogTrace("Code issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.Code);
+                Logger.LogTrace("Code issued for {clientId} / {subjectId}: {token}", clientId, subjectId,
+                    response.Code);
             }
+
             if (response.AccessToken != null)
             {
-                Logger.LogTrace("Access token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.AccessToken);
+                Logger.LogTrace("Access token issued for {clientId} / {subjectId}: {token}", clientId, subjectId,
+                    response.AccessToken);
             }
         }
 

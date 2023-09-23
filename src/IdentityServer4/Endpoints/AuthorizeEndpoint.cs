@@ -7,7 +7,6 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Extensions;
 using IdentityServer4.Hosting;
-using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
 using IdentityServer4.Storage.Stores;
@@ -16,13 +15,18 @@ using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
+// TODO: сделать типизированныq стор consentRequest
+// TODO: сохранить consentRequest по-настоящему
+// TODO: сделать типизированныq стор consentResponse
+// TODO: сохранить consentResponse по-настоящему
+// TODO: удалить старые сторы
+
 namespace IdentityServer4.Endpoints
 {
     internal class AuthorizeEndpoint : AuthorizeEndpointBase
     {
         private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
         private readonly ILoginResponseIdToRequestIdMessageStore _loginResponseIdToRequestIdMessageStore;
-        private readonly IStore _store;
 
         public AuthorizeEndpoint(
             IEventService events,
@@ -33,12 +37,12 @@ namespace IdentityServer4.Endpoints
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession, ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
             ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore,
-            IStore store)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession)
+            ILoginRequestStore loginRequestStore)
+            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession,
+                loginRequestStore)
         {
             _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
             _loginResponseIdToRequestIdMessageStore = loginResponseIdToRequestIdMessageStore;
-            _store = store;
         }
 
         public override async Task<IEndpointResult> ProcessAsync(HttpContext context)
@@ -68,47 +72,8 @@ namespace IdentityServer4.Endpoints
             }
 
             var user = await UserSession.GetUserAsync();
-            var loginRequestId = Guid.NewGuid().ToString();
 
-            if (user == null)
-            {
-                // TODO:
-                // + разобраться как будет связан response и request
-                // – сохранить в бд объект запроса
-                // – сделать типизированныq стор loginRequest
-                // – сделать типизированныq стор loginResponse
-                // – сделать типизированныq стор consentRequest
-                // – сделать типизированныq стор consentResponse
-                // – сделать миграцию (чистовую)
-                // – сделать клинап
-                // – удалить старые сторы
-
-                var loginRequest = new StoreItem(
-                    Key: "Key",
-                    Value: "Value",
-                    CreatedAtUtc: DateTime.UtcNow,
-                    RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
-                );
-                await _store.Create(loginRequest, context.RequestAborted);
-                
-
-                var loginResponseId = Guid.NewGuid().ToString();
-
-                var loginRequestIdToResponseId = new LoginRequestIdToResponseId { LoginResponseId = loginResponseId, };
-                var loginResponseIdToRequestId = new LoginResponseIdToRequestId { LoginRequestId = loginRequestId, };
-
-                var loginRequestIdToResponseIdMessage = new Message<LoginRequestIdToResponseId>(
-                    loginRequestIdToResponseId, DateTime.UtcNow);
-                var loginResponseIdToRequestIdMessage = new Message<LoginResponseIdToRequestId>(
-                    loginResponseIdToRequestId, DateTime.UtcNow);
-
-                await _loginRequestIdToResponseIdMessageStore.WriteAsync(
-                    loginRequestId, loginRequestIdToResponseIdMessage);
-                await _loginResponseIdToRequestIdMessageStore.WriteAsync(
-                    loginResponseId, loginResponseIdToRequestIdMessage);
-            }
-
-            var result = await ProcessAuthorizeRequestAsync(parameters, user, null, loginRequestId);
+            var result = await ProcessAuthorizeRequestAsync(parameters, user, null);
 
             Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");
 

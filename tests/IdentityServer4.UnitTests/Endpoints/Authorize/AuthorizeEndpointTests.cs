@@ -58,6 +58,9 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         private MockStore _mockStore =
             new MockStore();
 
+        private MockLoginRequestStore _mockLoginRequestStore =
+            new MockLoginRequestStore();
+
         private AuthorizeEndpoint _subject;
 
         private ClaimsPrincipal _user =
@@ -128,7 +131,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 _mockUserSession,
                 _mockLoginRequestIdToResponseIdMessageStore,
                 _mockLoginResponseIdToRequestIdMessageStore,
-                _mockStore
+                _mockLoginRequestStore
             );
         }
     }

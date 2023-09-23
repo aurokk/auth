@@ -11,6 +11,8 @@ using IdentityServer4.Endpoints;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
+using IdentityServer4.Storage.Stores;
+using IdentityServer4.UnitTests.Common;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -56,6 +58,15 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
 
         private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator =
             new StubAuthorizeInteractionResponseGenerator();
+
+        private MockStore _mockStore =
+            new MockStore();
+
+        private MockLoginRequestStore _mockLoginRequestStore =
+            new MockLoginRequestStore();
+
+        private MockLoginResponseStore _mockLoginResponseStore =
+            new MockLoginResponseStore();
 
         private AuthorizeCallbackEndpoint _subject;
 
@@ -129,7 +140,7 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
             var result = await _subject.ProcessAsync(_context);
 
             result.Should().BeOfType<AuthorizeResult>();
-            ((AuthorizeResult) result).Response.IsError.Should().BeTrue();
+            ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
         }
 
         [Fact]
@@ -255,7 +266,9 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 _mockUserSession,
                 _mockUserConsentResponseResponseMessageStore,
                 _mockUserLoginResponseResponseMessageStore,
-                _mockLoginResponseIdToRequestIdMessageStore
+                _mockLoginResponseIdToRequestIdMessageStore,
+                _mockLoginRequestStore,
+                _mockLoginResponseStore
             );
         }
     }
