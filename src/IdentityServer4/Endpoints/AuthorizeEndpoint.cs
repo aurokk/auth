@@ -14,10 +14,6 @@ using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-// TODO: сделать типизированныq стор consentRequest
-// TODO: сохранить consentRequest по-настоящему
-// TODO: сделать типизированныq стор consentResponse
-// TODO: сохранить consentResponse по-настоящему
 // TODO: почистить код
 // TODO: удалить старый consent стор
 
