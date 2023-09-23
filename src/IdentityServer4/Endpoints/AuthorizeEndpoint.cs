@@ -33,9 +33,21 @@ namespace IdentityServer4.Endpoints
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession,
-            ILoginRequestStore loginRequestStore)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession,
-                loginRequestStore)
+            ILoginRequestStore loginRequestStore,
+            IConsentRequest2Store consentRequestStore,
+            ILoginResponseStore loginResponseStore)
+            : base(
+                events: events,
+                logger: logger,
+                options: options,
+                validator: validator,
+                interactionGenerator: interactionGenerator,
+                authorizeResponseGenerator: authorizeResponseGenerator,
+                userSession: userSession,
+                loginRequestStore: loginRequestStore,
+                consentRequestStore: consentRequestStore,
+                loginResponseStore: loginResponseStore
+            )
         {
         }
 

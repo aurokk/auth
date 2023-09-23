@@ -26,6 +26,8 @@ namespace IdentityServer4.Endpoints
         private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
         private readonly ILoginRequestStore _loginRequestStore;
         private readonly ILoginResponseStore _loginResponseStore;
+        private readonly IConsentRequest2Store _consentRequestStore;
+        private readonly IConsentResponse2Store _consentResponseStore;
 
         public AuthorizeCallbackEndpoint(
             IEventService events,
@@ -36,14 +38,29 @@ namespace IdentityServer4.Endpoints
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession,
             IConsentResponseMessageStore consentResponseResponseStore,
-            ILoginRequestStore loginRequestStore, ILoginResponseStore loginResponseStore,
+            ILoginRequestStore loginRequestStore,
+            ILoginResponseStore loginResponseStore,
+            IConsentRequest2Store consentRequestStore,
+            IConsentResponse2Store consentResponseStore,
             IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession,
-                loginRequestStore)
+            : base(
+                events: events,
+                logger: logger,
+                options: options,
+                validator: validator,
+                interactionGenerator: interactionGenerator,
+                authorizeResponseGenerator: authorizeResponseGenerator,
+                userSession: userSession,
+                loginRequestStore: loginRequestStore,
+                consentRequestStore: consentRequestStore,
+                loginResponseStore: loginResponseStore
+            )
         {
             _consentResponseResponseStore = consentResponseResponseStore;
             _loginRequestStore = loginRequestStore;
             _loginResponseStore = loginResponseStore;
+            _consentRequestStore = consentRequestStore;
+            _consentResponseStore = consentResponseStore;
             _authorizationParametersMessageStore = authorizationParametersMessageStore;
         }
 
@@ -69,19 +86,22 @@ namespace IdentityServer4.Endpoints
                 var loginResponse = await _loginResponseStore.Get(loginResponseId, context.RequestAborted);
                 var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
                 parameters = HttpUtility.ParseQueryString(loginRequest.Data);
+                parameters["loginResponseId"] = query["loginResponseId"];
             }
 
             if (query["consentResponseId"] != null)
             {
-                if (!Guid.TryParse(query["consentResponseId"], out var loginResponseId))
+                if (!Guid.TryParse(query["consentResponseId"], out var consentResponseId))
                 {
                     return new StatusCodeResult(HttpStatusCode.BadRequest);
                 }
 
-                // var loginResponse = await _loginResponseStore.Get(loginResponseId, context.RequestAborted);
-                // var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
-                // parameters = HttpUtility.ParseQueryString(loginRequest.Data);
-                throw new NotImplementedException();
+                var consentResponse = await _consentResponseStore.Get(consentResponseId, context.RequestAborted);
+                var consentRequest = await _consentRequestStore.Get(consentResponse.ConsentRequestId, context.RequestAborted);
+                var loginResponse = await _loginResponseStore.Get(consentRequest.LoginResponseId, context.RequestAborted);
+                var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
+                parameters = HttpUtility.ParseQueryString(loginRequest.Data);
+                parameters["loginResponseId"] = query["loginResponseId"];
             }
 
             if (query["loginResponseId"] == null && query["consentResponseId"] == null)
@@ -120,16 +140,19 @@ namespace IdentityServer4.Endpoints
                 user = context.User;
             }
 
-            var consentRequest = new ConsentRequest(parameters, user?.GetSubjectId());
-            var consentResult = await _consentResponseResponseStore.ReadAsync(consentRequest.Id);
-            if (consentResult is { Data: null })
             {
-                return await CreateErrorResultAsync("consent message is missing data");
+                var consentRequest = new ConsentRequest(parameters, user?.GetSubjectId());
+                var consentResult = await _consentResponseResponseStore.ReadAsync(consentRequest.Id);
+                if (consentResult is { Data: null })
+                {
+                    return await CreateErrorResultAsync("consent message is missing data");
+                }
             }
 
             try
             {
-                var result = await ProcessAuthorizeRequestAsync(parameters, user, consentResult?.Data);
+                // var result = await ProcessAuthorizeRequestAsync(parameters, user, consentResult?.Data);
+                var result = await ProcessAuthorizeRequestAsync(parameters, user, null);
 
                 Logger.LogTrace("End Authorize Request. Result type: {0}", result?.GetType().ToString() ?? "-none-");
 
@@ -137,10 +160,10 @@ namespace IdentityServer4.Endpoints
             }
             finally
             {
-                if (consentResult != null)
-                {
-                    await _consentResponseResponseStore.DeleteAsync(consentRequest.Id);
-                }
+                // if (consentResult != null)
+                // {
+                //     await _consentResponseResponseStore.DeleteAsync(consentRequest.Id);
+                // }
             }
         }
     }

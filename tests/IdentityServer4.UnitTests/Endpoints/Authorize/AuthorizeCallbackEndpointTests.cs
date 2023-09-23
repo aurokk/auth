@@ -61,6 +61,12 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         private MockLoginResponseStore _mockLoginResponseStore =
             new MockLoginResponseStore();
 
+        private MockConsentRequestStore _mockConsentRequestStore =
+            new MockConsentRequestStore();
+
+        private MockConsentResponseStore _mockConsentResponseStore =
+            new MockConsentResponseStore();
+
         private AuthorizeCallbackEndpoint _subject;
 
         private ClaimsPrincipal _user =
@@ -250,16 +256,18 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
             _stubAuthorizeRequestValidator.Result = new AuthorizeRequestValidationResult(_validatedAuthorizeRequest);
 
             _subject = new AuthorizeCallbackEndpoint(
-                _fakeEventService,
-                _fakeLogger,
-                _options,
-                _stubAuthorizeRequestValidator,
-                _stubInteractionGenerator,
-                _stubAuthorizeResponseGenerator,
-                _mockUserSession,
-                _mockUserConsentResponseResponseMessageStore,
-                _mockLoginRequestStore,
-                _mockLoginResponseStore
+                events: _fakeEventService,
+                logger: _fakeLogger,
+                options: _options,
+                validator: _stubAuthorizeRequestValidator,
+                interactionGenerator: _stubInteractionGenerator,
+                authorizeResponseGenerator: _stubAuthorizeResponseGenerator,
+                userSession: _mockUserSession,
+                consentResponseResponseStore: _mockUserConsentResponseResponseMessageStore,
+                loginRequestStore: _mockLoginRequestStore,
+                loginResponseStore: _mockLoginResponseStore,
+                consentRequestStore: _mockConsentRequestStore,
+                consentResponseStore: _mockConsentResponseStore
             );
         }
     }

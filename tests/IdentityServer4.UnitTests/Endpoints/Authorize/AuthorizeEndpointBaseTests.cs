@@ -50,6 +50,12 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         private MockLoginRequestStore _mockLoginRequestStore =
             new MockLoginRequestStore();
 
+        private MockLoginResponseStore _mockLoginResponseStore =
+            new MockLoginResponseStore();
+
+        private MockConsentRequestStore _mockConsentRequestStore =
+            new MockConsentRequestStore();
+
         private TestAuthorizeEndpoint _subject;
 
         private ClaimsPrincipal _user = new IdentityServerUser("bob").CreatePrincipal();
@@ -195,7 +201,10 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 _stubInteractionGenerator,
                 _stubAuthorizeResponseGenerator,
                 _mockUserSession,
-                _mockLoginRequestStore);
+                _mockLoginRequestStore,
+                _mockLoginResponseStore,
+                _mockConsentRequestStore
+            );
         }
 
         internal class TestAuthorizeEndpoint : AuthorizeEndpointBase
@@ -208,9 +217,22 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 IAuthorizeInteractionResponseGenerator interactionGenerator,
                 IAuthorizeResponseGenerator authorizeResponseGenerator,
                 IUserSession userSession,
-                ILoginRequestStore loginRequestStore)
-                : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator,
-                    userSession, loginRequestStore)
+                ILoginRequestStore loginRequestStore,
+                ILoginResponseStore loginResponseStore,
+                IConsentRequest2Store consentRequestStore
+            )
+                : base(
+                    events: events,
+                    logger: logger,
+                    options: options,
+                    validator: validator,
+                    interactionGenerator: interactionGenerator,
+                    authorizeResponseGenerator: authorizeResponseGenerator,
+                    userSession: userSession,
+                    loginRequestStore: loginRequestStore,
+                    loginResponseStore: loginResponseStore,
+                    consentRequestStore: consentRequestStore
+                )
             {
             }
 

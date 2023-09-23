@@ -28,6 +28,8 @@ namespace IdentityServer4.Endpoints
         private readonly IAuthorizeInteractionResponseGenerator _interactionGenerator;
         private readonly IAuthorizeRequestValidator _validator;
         private readonly ILoginRequestStore _loginRequestStore;
+        private readonly ILoginResponseStore _loginResponseStore;
+        private readonly IConsentRequest2Store _consentRequestStore;
 
         protected AuthorizeEndpointBase(IEventService events,
             ILogger<AuthorizeEndpointBase> logger,
@@ -36,7 +38,9 @@ namespace IdentityServer4.Endpoints
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession,
-            ILoginRequestStore loginRequestStore)
+            ILoginRequestStore loginRequestStore,
+            IConsentRequest2Store consentRequestStore,
+            ILoginResponseStore loginResponseStore)
         {
             _events = events;
             _options = options;
@@ -46,6 +50,8 @@ namespace IdentityServer4.Endpoints
             _authorizeResponseGenerator = authorizeResponseGenerator;
             UserSession = userSession;
             _loginRequestStore = loginRequestStore;
+            _consentRequestStore = consentRequestStore;
+            _loginResponseStore = loginResponseStore;
         }
 
         protected ILogger Logger { get; private set; }
@@ -105,6 +111,23 @@ namespace IdentityServer4.Endpoints
 
             if (interactionResult.IsConsent)
             {
+                if (parameters["loginResponseId"] == null ||
+                    !Guid.TryParse(parameters["loginResponseId"], out var loginResponseId))
+                {
+                    throw new NotImplementedException();
+                }
+
+                var loginResponse = await _loginResponseStore.Get(loginResponseId, CancellationToken.None);
+                var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, CancellationToken.None);
+                var consentRequest = new IdentityServer4.Storage.Stores.ConsentRequest2(
+                    Id: Guid.NewGuid(),
+                    LoginRequestId: loginRequest.Id,
+                    LoginResponseId: loginResponse.Id,
+                    CreatedAtUtc: DateTime.UtcNow,
+                    RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
+                );
+                await _consentRequestStore.Create(consentRequest, CancellationToken.None);
+                return new ConsentPageResult2(_options, consentRequest.Id);
                 return new ConsentPageResult(request);
             }
 

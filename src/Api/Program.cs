@@ -129,6 +129,8 @@ services
     .AddScoped<IStore, Store>()
     .AddScoped<ILoginRequestStore, LoginRequestStore>()
     .AddScoped<ILoginResponseStore, LoginResponseStore>()
+    .AddScoped<IConsentRequest2Store, ConsentRequestStore>()
+    .AddScoped<IConsentResponse2Store, ConsentResponseStore>()
     .AddDbContext<OperationalDbContext>(dbContextBuilder =>
     {
         var configuration = builder.Configuration;
