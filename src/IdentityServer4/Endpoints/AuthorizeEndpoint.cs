@@ -10,7 +10,6 @@ using IdentityServer4.Hosting;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
 using IdentityServer4.Storage.Stores;
-using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -19,15 +18,13 @@ using Microsoft.Extensions.Logging;
 // TODO: сохранить consentRequest по-настоящему
 // TODO: сделать типизированныq стор consentResponse
 // TODO: сохранить consentResponse по-настоящему
-// TODO: удалить старые сторы
+// TODO: почистить код
+// TODO: удалить старый consent стор
 
 namespace IdentityServer4.Endpoints
 {
     internal class AuthorizeEndpoint : AuthorizeEndpointBase
     {
-        private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
-        private readonly ILoginResponseIdToRequestIdMessageStore _loginResponseIdToRequestIdMessageStore;
-
         public AuthorizeEndpoint(
             IEventService events,
             ILogger<AuthorizeEndpoint> logger,
@@ -35,14 +32,11 @@ namespace IdentityServer4.Endpoints
             IAuthorizeRequestValidator validator,
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
-            IUserSession userSession, ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
-            ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore,
+            IUserSession userSession,
             ILoginRequestStore loginRequestStore)
             : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession,
                 loginRequestStore)
         {
-            _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
-            _loginResponseIdToRequestIdMessageStore = loginResponseIdToRequestIdMessageStore;
         }
 
         public override async Task<IEndpointResult> ProcessAsync(HttpContext context)

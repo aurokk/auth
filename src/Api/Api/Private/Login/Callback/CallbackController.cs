@@ -34,20 +34,15 @@ public sealed record RejectResponse(
 [Route("api/private/login/callback")]
 public class CallbackController : ControllerBase
 {
-    private readonly ILoginResponseMessageStore _loginResponseMessageStore;
-    private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
     private readonly ILogger<CallbackController> _logger;
     private readonly ILoginRequestStore _loginRequestStore;
     private readonly ILoginResponseStore _loginResponseStore;
 
-    public CallbackController(ILoginResponseMessageStore loginResponseMessageStore,
-        ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
+    public CallbackController(
         ILogger<CallbackController> logger,
         ILoginRequestStore loginRequestStore,
         ILoginResponseStore loginResponseStore)
     {
-        _loginResponseMessageStore = loginResponseMessageStore;
-        _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
         _logger = logger;
         _loginRequestStore = loginRequestStore;
         _loginResponseStore = loginResponseStore;

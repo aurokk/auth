@@ -79,10 +79,7 @@ services
 
 // overrides
 services
-    .AddSingleton<IConsentResponseMessageStore, ConsentResponseMessageStore>()
-    .AddSingleton<ILoginResponseMessageStore, LoginResponseMessageStore>()
-    .AddSingleton<ILoginRequestIdToResponseIdMessageStore, LoginRequestIdToResponseIdMessageStore>()
-    .AddSingleton<ILoginResponseIdToRequestIdMessageStore, LoginResponseIdToRequestIdMessageStore>();
+    .AddSingleton<IConsentResponseMessageStore, ConsentResponseMessageStore>();
 
 services
     .AddHealthChecks();

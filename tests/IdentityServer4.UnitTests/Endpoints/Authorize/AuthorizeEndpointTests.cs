@@ -49,12 +49,6 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator =
             new StubAuthorizeInteractionResponseGenerator();
 
-        private MockLoginRequestIdToResponseIdMessageStore _mockLoginRequestIdToResponseIdMessageStore =
-            new MockLoginRequestIdToResponseIdMessageStore();
-
-        private MockLoginResponseIdToRequestIdMessageStore _mockLoginResponseIdToRequestIdMessageStore =
-            new MockLoginResponseIdToRequestIdMessageStore();
-
         private MockStore _mockStore =
             new MockStore();
 
@@ -129,8 +123,6 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 _stubInteractionGenerator,
                 _stubAuthorizeResponseGenerator,
                 _mockUserSession,
-                _mockLoginRequestIdToResponseIdMessageStore,
-                _mockLoginResponseIdToRequestIdMessageStore,
                 _mockLoginRequestStore
             );
         }

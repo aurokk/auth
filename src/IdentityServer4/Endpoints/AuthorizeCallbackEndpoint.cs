@@ -22,10 +22,8 @@ namespace IdentityServer4.Endpoints
 {
     internal class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
     {
-        private readonly ILoginResponseMessageStore _loginResponseMessageStore;
         private readonly IConsentResponseMessageStore _consentResponseResponseStore;
         private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
-        private readonly ILoginResponseIdToRequestIdMessageStore _loginResponseIdToRequestIdMessageStore;
         private readonly ILoginRequestStore _loginRequestStore;
         private readonly ILoginResponseStore _loginResponseStore;
 
@@ -38,16 +36,12 @@ namespace IdentityServer4.Endpoints
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession,
             IConsentResponseMessageStore consentResponseResponseStore,
-            ILoginResponseMessageStore loginResponseMessageStore,
-            ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore,
             ILoginRequestStore loginRequestStore, ILoginResponseStore loginResponseStore,
             IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
             : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession,
                 loginRequestStore)
         {
             _consentResponseResponseStore = consentResponseResponseStore;
-            _loginResponseMessageStore = loginResponseMessageStore;
-            _loginResponseIdToRequestIdMessageStore = loginResponseIdToRequestIdMessageStore;
             _loginRequestStore = loginRequestStore;
             _loginResponseStore = loginResponseStore;
             _authorizationParametersMessageStore = authorizationParametersMessageStore;
