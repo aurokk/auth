@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Concurrent;
 using IdentityServer4.Storage.Stores;
 
@@ -7,10 +9,15 @@ public class MockStore : IStore
 {
     private readonly ConcurrentDictionary<string, StoreItem> _items = new();
 
-    public Task<StoreItem> Get(string key, CancellationToken ct)
+    public Task<StoreItem?> TryGet(string key, CancellationToken ct)
     {
         _items.TryGetValue(key, out var message);
         return Task.FromResult(message);
+    }
+
+    public async Task<StoreItem> Get(string key, CancellationToken ct)
+    {
+        return await TryGet(key, ct) ?? throw new ApplicationException();
     }
 
     public Task Create(StoreItem item, CancellationToken ct)

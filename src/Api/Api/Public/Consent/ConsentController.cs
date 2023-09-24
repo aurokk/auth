@@ -1,5 +1,4 @@
 using Api.Quickstart.Consent;
-using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Storage.Stores;
 using JetBrains.Annotations;
@@ -31,26 +30,26 @@ public sealed record RejectRequest(string ConsentRequestId);
 public class ConsentController : ControllerBase
 {
     private readonly IIdentityServerInteractionService _interaction;
-    private readonly ILoginRequestStore _loginRequestStore;
     private readonly IConsentRequest2Store _consentRequestStore;
     private readonly IConsentResponse2Store _consentResponseStore;
     private readonly IConsentService _consentService;
     private readonly IUserSession _userSession;
+    private readonly IAuthorizeRequest2Store _authorizeRequest2Store;
 
     public ConsentController(
         IIdentityServerInteractionService interaction,
-        ILoginRequestStore loginRequestStore,
         IConsentRequest2Store consentRequestStore,
         IConsentResponse2Store consentResponseStore,
         IConsentService consentService,
-        IUserSession userSession)
+        IUserSession userSession,
+        IAuthorizeRequest2Store authorizeRequest2Store)
     {
         _interaction = interaction;
         _consentRequestStore = consentRequestStore;
-        _loginRequestStore = loginRequestStore;
         _consentResponseStore = consentResponseStore;
         _consentService = consentService;
         _userSession = userSession;
+        _authorizeRequest2Store = authorizeRequest2Store;
     }
 
     [HttpGet]
@@ -66,10 +65,10 @@ public class ConsentController : ControllerBase
         }
 
         var consentRequest = await _consentRequestStore.Get(consentRequestGuid, ct);
-        var loginRequest = await _loginRequestStore.Get(consentRequest.LoginRequestId, ct);
+        var authorizeRequest = await _authorizeRequest2Store.Get(consentRequest.AuthorizeRequestId, ct);
         var context =
             await _interaction.GetAuthorizationContextAsync(
-                returnUrl: $"https://localhost:/?{loginRequest.Data}"); // TODO
+                returnUrl: $"https://localhost:/?{authorizeRequest.Data}"); // TODO
 
         var apiScopes = context.ValidatedResources.Resources.ApiScopes
             .Select(s => new GetOneResponse.ScopeDto(
@@ -125,11 +124,10 @@ public class ConsentController : ControllerBase
         }
 
         var consentRequest = await _consentRequestStore.Get(consentRequestId, ct);
-
-        var loginRequest = await _loginRequestStore.Get(consentRequest.LoginRequestId, ct);
+        var authorizeRequest = await _authorizeRequest2Store.Get(consentRequest.AuthorizeRequestId, ct);
         var context =
             await _interaction.GetAuthorizationContextAsync(
-                returnUrl: $"https://localhost:/?{loginRequest.Data}"); // TODO
+                returnUrl: $"https://localhost:/?{authorizeRequest.Data}"); // TODO
         // var grantedConsent = new ConsentResponse
         // {
         //     // Description = "No description",

@@ -1,6 +1,13 @@
+#nullable enable
+
 using IdentityServer4.Storage.Stores;
+using Newtonsoft.Json;
 
 namespace IdentityServer4.EntityFramework.Storage.Stores;
+
+public sealed record LoginRequestData(
+    Guid AuthorizeRequestId
+);
 
 public class LoginRequestStore : ILoginRequestStore
 {
@@ -15,9 +22,11 @@ public class LoginRequestStore : ILoginRequestStore
     {
         var storeItemKey = BuildKey(id);
         var storeItem = await _store.Get(storeItemKey, ct);
+        var data = JsonConvert.DeserializeObject<LoginRequestData>(storeItem.Value) ??
+                   throw new ApplicationException();
         var loginRequest = new LoginRequest(
             Id: id,
-            Data: storeItem.Value,
+            AuthorizeRequestId: data.AuthorizeRequestId,
             CreatedAtUtc: storeItem.CreatedAtUtc,
             RemoveAtUtc: storeItem.RemoveAtUtc
         );
@@ -27,9 +36,13 @@ public class LoginRequestStore : ILoginRequestStore
     public async Task Create(LoginRequest loginRequest, CancellationToken ct)
     {
         var storeItemKey = BuildKey(loginRequest.Id);
+        var data = new LoginRequestData(
+            AuthorizeRequestId: loginRequest.AuthorizeRequestId
+        );
+        var value = JsonConvert.SerializeObject(data);
         var storeItem = new StoreItem(
             Key: storeItemKey,
-            Value: loginRequest.Data,
+            Value: value,
             CreatedAtUtc: loginRequest.CreatedAtUtc,
             RemoveAtUtc: loginRequest.RemoveAtUtc
         );

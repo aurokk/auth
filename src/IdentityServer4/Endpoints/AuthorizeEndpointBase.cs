@@ -61,6 +61,7 @@ namespace IdentityServer4.Endpoints
         public abstract Task<IEndpointResult> ProcessAsync(HttpContext context);
 
         internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(
+            AuthorizeRequest2 authorizeRequest2,
             NameValueCollection parameters,
             ClaimsPrincipal user,
             ConsentResponse consent)
@@ -100,7 +101,7 @@ namespace IdentityServer4.Endpoints
             {
                 var loginRequest = new IdentityServer4.Storage.Stores.LoginRequest(
                     Id: Guid.NewGuid(),
-                    Data: parameters.ToQueryString(),
+                    AuthorizeRequestId: authorizeRequest2.Id,
                     CreatedAtUtc: DateTime.UtcNow,
                     RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
                 );
@@ -111,18 +112,9 @@ namespace IdentityServer4.Endpoints
 
             if (interactionResult.IsConsent)
             {
-                if (parameters["loginResponseId"] == null ||
-                    !Guid.TryParse(parameters["loginResponseId"], out var loginResponseId))
-                {
-                    throw new NotImplementedException();
-                }
-
-                var loginResponse = await _loginResponseStore.Get(loginResponseId, CancellationToken.None);
-                var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, CancellationToken.None);
                 var consentRequest = new IdentityServer4.Storage.Stores.ConsentRequest2(
                     Id: Guid.NewGuid(),
-                    LoginRequestId: loginRequest.Id,
-                    LoginResponseId: loginResponse.Id,
+                    AuthorizeRequestId: authorizeRequest2.Id,
                     CreatedAtUtc: DateTime.UtcNow,
                     RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
                 );

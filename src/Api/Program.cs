@@ -127,6 +127,7 @@ services
 
 services
     .AddScoped<IStore, Store>()
+    .AddScoped<IAuthorizeRequest2Store, AuthorizeRequest2Store>()
     .AddScoped<ILoginRequestStore, LoginRequestStore>()
     .AddScoped<ILoginResponseStore, LoginResponseStore>()
     .AddScoped<IConsentRequest2Store, ConsentRequestStore>()

@@ -4,8 +4,7 @@ using Newtonsoft.Json;
 namespace IdentityServer4.EntityFramework.Storage.Stores;
 
 public sealed record ConsentRequestData(
-    Guid LoginRequestId,
-    Guid LoginResponseId
+    Guid AuthorizeRequestId
 );
 
 public class ConsentRequestStore : IConsentRequest2Store
@@ -25,8 +24,7 @@ public class ConsentRequestStore : IConsentRequest2Store
                    throw new ApplicationException();
         var consentRequest = new ConsentRequest2(
             Id: id,
-            LoginRequestId: data.LoginRequestId,
-            LoginResponseId: data.LoginResponseId,
+            AuthorizeRequestId: data.AuthorizeRequestId,
             CreatedAtUtc: storeItem.CreatedAtUtc,
             RemoveAtUtc: storeItem.RemoveAtUtc
         );
@@ -37,8 +35,7 @@ public class ConsentRequestStore : IConsentRequest2Store
     {
         var storeItemKey = BuildKey(consentRequest.Id);
         var data = new ConsentRequestData(
-            LoginRequestId: consentRequest.LoginRequestId,
-            LoginResponseId: consentRequest.LoginResponseId
+            AuthorizeRequestId: consentRequest.AuthorizeRequestId
         );
         var value = JsonConvert.SerializeObject(data);
         var storeItem = new StoreItem(

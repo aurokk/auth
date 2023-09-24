@@ -16,11 +16,14 @@ using Microsoft.Extensions.Logging;
 
 // TODO: почистить код
 // TODO: удалить старый consent стор
+// TODO: сделать отдельный стор для authorization request
 
 namespace IdentityServer4.Endpoints
 {
     internal class AuthorizeEndpoint : AuthorizeEndpointBase
     {
+        private readonly IAuthorizeRequest2Store _authorizeRequestStore;
+
         public AuthorizeEndpoint(
             IEventService events,
             ILogger<AuthorizeEndpoint> logger,
@@ -31,7 +34,8 @@ namespace IdentityServer4.Endpoints
             IUserSession userSession,
             ILoginRequestStore loginRequestStore,
             IConsentRequest2Store consentRequestStore,
-            ILoginResponseStore loginResponseStore)
+            ILoginResponseStore loginResponseStore,
+            IAuthorizeRequest2Store authorizeRequestStore)
             : base(
                 events: events,
                 logger: logger,
@@ -45,6 +49,7 @@ namespace IdentityServer4.Endpoints
                 loginResponseStore: loginResponseStore
             )
         {
+            _authorizeRequestStore = authorizeRequestStore;
         }
 
         public override async Task<IEndpointResult> ProcessAsync(HttpContext context)
@@ -73,9 +78,16 @@ namespace IdentityServer4.Endpoints
                 return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
             }
 
-            var user = await UserSession.GetUserAsync();
+            var authorizeRequest = new AuthorizeRequest2(
+                Id: Guid.NewGuid(),
+                Data: parameters.ToQueryString(),
+                CreatedAtUtc: DateTime.UtcNow,
+                RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromHours(1)
+            );
+            await _authorizeRequestStore.Create(authorizeRequest, context.RequestAborted);
 
-            var result = await ProcessAuthorizeRequestAsync(parameters, user, null);
+            var user = await UserSession.GetUserAsync();
+            var result = await ProcessAuthorizeRequestAsync(authorizeRequest, parameters, user, null);
 
             Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");
 

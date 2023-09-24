@@ -2,7 +2,7 @@ namespace IdentityServer4.Storage.Stores;
 
 public sealed record LoginRequest(
     Guid Id,
-    string Data,
+    Guid AuthorizeRequestId,
     DateTime CreatedAtUtc,
     DateTime RemoveAtUtc
 );

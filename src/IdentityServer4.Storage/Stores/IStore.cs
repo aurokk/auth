@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace IdentityServer4.Storage.Stores;
 
 public sealed record StoreItem(
@@ -9,6 +11,7 @@ public sealed record StoreItem(
 
 public interface IStore
 {
+    Task<StoreItem?> TryGet(string key, CancellationToken ct);
     Task<StoreItem> Get(string key, CancellationToken ct);
     Task Create(StoreItem item, CancellationToken ct);
     Task Delete(string key, CancellationToken ct);

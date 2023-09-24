@@ -267,7 +267,8 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
                 loginRequestStore: _mockLoginRequestStore,
                 loginResponseStore: _mockLoginResponseStore,
                 consentRequestStore: _mockConsentRequestStore,
-                consentResponseStore: _mockConsentResponseStore
+                consentResponseStore: _mockConsentResponseStore,
+                authorizeRequest2Store: null
             );
         }
     }

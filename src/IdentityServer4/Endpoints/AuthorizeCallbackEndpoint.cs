@@ -28,6 +28,7 @@ namespace IdentityServer4.Endpoints
         private readonly ILoginResponseStore _loginResponseStore;
         private readonly IConsentRequest2Store _consentRequestStore;
         private readonly IConsentResponse2Store _consentResponseStore;
+        private readonly IAuthorizeRequest2Store _authorizeRequest2Store;
 
         public AuthorizeCallbackEndpoint(
             IEventService events,
@@ -42,6 +43,7 @@ namespace IdentityServer4.Endpoints
             ILoginResponseStore loginResponseStore,
             IConsentRequest2Store consentRequestStore,
             IConsentResponse2Store consentResponseStore,
+            IAuthorizeRequest2Store authorizeRequest2Store,
             IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
             : base(
                 events: events,
@@ -61,6 +63,7 @@ namespace IdentityServer4.Endpoints
             _loginResponseStore = loginResponseStore;
             _consentRequestStore = consentRequestStore;
             _consentResponseStore = consentResponseStore;
+            _authorizeRequest2Store = authorizeRequest2Store;
             _authorizationParametersMessageStore = authorizationParametersMessageStore;
         }
 
@@ -76,6 +79,7 @@ namespace IdentityServer4.Endpoints
 
             var query = context.Request.Query.AsNameValueCollection();
             var parameters = new NameValueCollection();
+            AuthorizeRequest2? authorizeRequest = null;
             if (query["loginResponseId"] != null)
             {
                 if (!Guid.TryParse(query["loginResponseId"], out var loginResponseId))
@@ -85,7 +89,8 @@ namespace IdentityServer4.Endpoints
 
                 var loginResponse = await _loginResponseStore.Get(loginResponseId, context.RequestAborted);
                 var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
-                parameters = HttpUtility.ParseQueryString(loginRequest.Data);
+                authorizeRequest = await _authorizeRequest2Store.Get(loginRequest.AuthorizeRequestId, context.RequestAborted);
+                parameters = HttpUtility.ParseQueryString(authorizeRequest.Data);
                 parameters["loginResponseId"] = query["loginResponseId"];
             }
 
@@ -98,27 +103,26 @@ namespace IdentityServer4.Endpoints
 
                 var consentResponse = await _consentResponseStore.Get(consentResponseId, context.RequestAborted);
                 var consentRequest = await _consentRequestStore.Get(consentResponse.ConsentRequestId, context.RequestAborted);
-                var loginResponse = await _loginResponseStore.Get(consentRequest.LoginResponseId, context.RequestAborted);
-                var loginRequest = await _loginRequestStore.Get(loginResponse.LoginRequestId, context.RequestAborted);
-                parameters = HttpUtility.ParseQueryString(loginRequest.Data);
+                authorizeRequest = await _authorizeRequest2Store.Get(consentRequest.AuthorizeRequestId, context.RequestAborted);
+                parameters = HttpUtility.ParseQueryString(authorizeRequest.Data);
                 parameters["loginResponseId"] = query["loginResponseId"];
             }
 
             if (query["loginResponseId"] == null && query["consentResponseId"] == null)
             {
-                parameters = query;
+                return new StatusCodeResult(HttpStatusCode.BadRequest);
             }
 
             // var parameters = _loginRequestStore.Get()
-            if (_authorizationParametersMessageStore != null)
-            {
-                // TODO: поисследовать че за мессадж стор
-                // никакой докуменатции нет, похоже это не работает, но идея, в целом, была неплохой
-                var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
-                var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
-                parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
-                await _authorizationParametersMessageStore.DeleteAsync(messageStoreId);
-            }
+            // if (_authorizationParametersMessageStore != null)
+            // {
+            //     // TODO: поисследовать че за мессадж стор
+            //     // никакой докуменатции нет, похоже это не работает, но идея, в целом, была неплохой
+            //     var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
+            //     var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
+            //     parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
+            //     await _authorizationParametersMessageStore.DeleteAsync(messageStoreId);
+            // }
 
             var user = await UserSession.GetUserAsync();
             if (user == null && query["loginResponseId"] != null)
@@ -140,19 +144,19 @@ namespace IdentityServer4.Endpoints
                 user = context.User;
             }
 
-            {
-                var consentRequest = new ConsentRequest(parameters, user?.GetSubjectId());
-                var consentResult = await _consentResponseResponseStore.ReadAsync(consentRequest.Id);
-                if (consentResult is { Data: null })
-                {
-                    return await CreateErrorResultAsync("consent message is missing data");
-                }
-            }
+            // {
+            //     var consentRequest = new ConsentRequest(parameters, user?.GetSubjectId());
+            //     var consentResult = await _consentResponseResponseStore.ReadAsync(consentRequest.Id);
+            //     if (consentResult is { Data: null })
+            //     {
+            //         return await CreateErrorResultAsync("consent message is missing data");
+            //     }
+            // }
 
             try
             {
                 // var result = await ProcessAuthorizeRequestAsync(parameters, user, consentResult?.Data);
-                var result = await ProcessAuthorizeRequestAsync(parameters, user, null);
+                var result = await ProcessAuthorizeRequestAsync(authorizeRequest, parameters, user, null);
 
                 Logger.LogTrace("End Authorize Request. Result type: {0}", result?.GetType().ToString() ?? "-none-");
 

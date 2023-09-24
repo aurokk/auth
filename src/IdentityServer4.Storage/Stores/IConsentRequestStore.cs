@@ -2,8 +2,7 @@ namespace IdentityServer4.Storage.Stores;
 
 public sealed record ConsentRequest2(
     Guid Id,
-    Guid LoginRequestId,
-    Guid LoginResponseId,
+    Guid AuthorizeRequestId,
     DateTime CreatedAtUtc,
     DateTime RemoveAtUtc
 );
