@@ -1,4 +1,6 @@
+using System.Web;
 using IdentityServer4.Models;
+using IdentityServer4.Storage.Stores;
 using IdentityServer4.Stores;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
@@ -32,17 +34,18 @@ public sealed record RejectResponse(
 [Route("api/private/login/callback")]
 public class CallbackController : ControllerBase
 {
-    private readonly ILoginResponseMessageStore _loginResponseMessageStore;
-    private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
     private readonly ILogger<CallbackController> _logger;
+    private readonly ILoginRequestStore _loginRequestStore;
+    private readonly ILoginResponseStore _loginResponseStore;
 
-    public CallbackController(ILoginResponseMessageStore loginResponseMessageStore,
-        ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
-        ILogger<CallbackController> logger)
+    public CallbackController(
+        ILogger<CallbackController> logger,
+        ILoginRequestStore loginRequestStore,
+        ILoginResponseStore loginResponseStore)
     {
-        _loginResponseMessageStore = loginResponseMessageStore;
-        _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
         _logger = logger;
+        _loginRequestStore = loginRequestStore;
+        _loginResponseStore = loginResponseStore;
     }
 
     [HttpPost]
@@ -52,8 +55,8 @@ public class CallbackController : ControllerBase
     {
         _logger.LogInformation("Request {Request}", JsonConvert.SerializeObject(request));
 
-        var id = request.LoginRequestId;
-        if (string.IsNullOrWhiteSpace(id))
+        if (string.IsNullOrWhiteSpace(request.LoginRequestId) ||
+            !Guid.TryParse(request.LoginRequestId, out var loginRequestId)) // TODO
         {
             return BadRequest();
         }
@@ -64,19 +67,32 @@ public class CallbackController : ControllerBase
             return BadRequest();
         }
 
-        var requestIdToResponseIdMessage =
-            await _loginRequestIdToResponseIdMessageStore.ReadAsync(request.LoginRequestId);
+        var loginRequest = await _loginRequestStore.Get(loginRequestId, ct); // TODO
 
-        var lr = new LoginResponse
-        {
-            IsSuccess = true,
-            SubjectId = subjectId,
-        };
-        var utcNow = DateTime.UtcNow;
-        var lrMessage = new Message<LoginResponse>(lr, utcNow);
-        await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
+        var loginResponse = new IdentityServer4.Storage.Stores.LoginResponse(
+            Id: Guid.NewGuid(),
+            LoginRequestId: loginRequestId,
+            SubjectId: subjectId,
+            IsSuccess: true,
+            CreatedAtUtc: DateTime.UtcNow,
+            RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromDays(1)
+        );
 
-        var response = new AcceptResponse(requestIdToResponseIdMessage.Data.LoginResponseId);
+        await _loginResponseStore.Create(loginResponse, ct);
+
+        // var requestIdToResponseIdMessage =
+        //     await _loginRequestIdToResponseIdMessageStore.ReadAsync(request.LoginRequestId);
+        //
+        // var lr = new LoginResponse
+        // {
+        //     IsSuccess = true,
+        //     SubjectId = subjectId,
+        // };
+        // var utcNow = DateTime.UtcNow;
+        // var lrMessage = new Message<LoginResponse>(lr, utcNow);
+        // await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
+
+        var response = new AcceptResponse(loginResponse.Id.ToString("N"));
         return Ok(response);
     }
 
@@ -91,18 +107,20 @@ public class CallbackController : ControllerBase
             return BadRequest();
         }
 
-        var requestIdToResponseIdMessage =
-            await _loginRequestIdToResponseIdMessageStore.ReadAsync(request.LoginRequestId);
+        // var requestIdToResponseIdMessage =
+        //     await _loginRequestIdToResponseIdMessageStore.ReadAsync(request.LoginRequestId);
+        //
+        // var lr = new LoginResponse
+        // {
+        //     IsSuccess = false,
+        // };
+        // var utcNow = DateTime.UtcNow;
+        // var lrMessage = new Message<LoginResponse>(lr, utcNow);
+        // await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
 
-        var lr = new LoginResponse
-        {
-            IsSuccess = false,
-        };
-        var utcNow = DateTime.UtcNow;
-        var lrMessage = new Message<LoginResponse>(lr, utcNow);
-        await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
+        // var response = new RejectResponse(requestIdToResponseIdMessage.Data.LoginResponseId);
+        // return Ok(response);
 
-        var response = new RejectResponse(requestIdToResponseIdMessage.Data.LoginResponseId);
-        return Ok(response);
+        throw new NotImplementedException();
     }
 }

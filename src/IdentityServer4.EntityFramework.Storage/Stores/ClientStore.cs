@@ -1,7 +1,6 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-
 using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
@@ -60,8 +59,10 @@ namespace IdentityServer4.EntityFramework.Stores
             await baseQuery.Include(x => x.AllowedScopes).SelectMany(c => c.AllowedScopes).LoadAsync();
             await baseQuery.Include(x => x.Claims).SelectMany(c => c.Claims).LoadAsync();
             await baseQuery.Include(x => x.ClientSecrets).SelectMany(c => c.ClientSecrets).LoadAsync();
-            await baseQuery.Include(x => x.IdentityProviderRestrictions).SelectMany(c => c.IdentityProviderRestrictions).LoadAsync();
-            await baseQuery.Include(x => x.PostLogoutRedirectUris).SelectMany(c => c.PostLogoutRedirectUris).LoadAsync();
+            await baseQuery.Include(x => x.IdentityProviderRestrictions).SelectMany(c => c.IdentityProviderRestrictions)
+                .LoadAsync();
+            await baseQuery.Include(x => x.PostLogoutRedirectUris).SelectMany(c => c.PostLogoutRedirectUris)
+                .LoadAsync();
             await baseQuery.Include(x => x.Properties).SelectMany(c => c.Properties).LoadAsync();
             await baseQuery.Include(x => x.RedirectUris).SelectMany(c => c.RedirectUris).LoadAsync();
 

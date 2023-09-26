@@ -153,9 +153,6 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.TryAddTransient<ICorsPolicyService, DefaultCorsPolicyService>();
             builder.Services.TryAddTransient<IProfileService, DefaultProfileService>();
             builder.Services.TryAddTransient<IConsentResponseMessageStore, ConsentResponseMessageStore>();
-            builder.Services.TryAddTransient<ILoginResponseMessageStore, LoginResponseMessageStore>();
-            builder.Services.TryAddTransient<ILoginRequestIdToResponseIdMessageStore, LoginRequestIdToResponseIdMessageStore>();
-            builder.Services.TryAddTransient<ILoginResponseIdToRequestIdMessageStore, LoginResponseIdToRequestIdMessageStore>();
             builder.Services.TryAddTransient<IMessageStore<LogoutMessage>, ProtectedDataMessageStore<LogoutMessage>>();
             builder.Services.TryAddTransient<IMessageStore<LogoutNotificationContext>, ProtectedDataMessageStore<LogoutNotificationContext>>();
             builder.Services.TryAddTransient<IMessageStore<ErrorMessage>, ProtectedDataMessageStore<ErrorMessage>>();

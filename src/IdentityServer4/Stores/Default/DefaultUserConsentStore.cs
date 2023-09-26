@@ -22,11 +22,12 @@ namespace IdentityServer4.Stores
         /// <param name="handleGenerationService">The handle generation service.</param>
         /// <param name="logger">The logger.</param>
         public DefaultUserConsentStore(
-            IPersistedGrantStore store, 
+            IPersistedGrantStore store,
             IPersistentGrantSerializer serializer,
             IHandleGenerationService handleGenerationService,
-            ILogger<DefaultUserConsentStore> logger) 
-            : base(IdentityServerConstants.PersistedGrantTypes.UserConsent, store, serializer, handleGenerationService, logger)
+            ILogger<DefaultUserConsentStore> logger)
+            : base(IdentityServerConstants.PersistedGrantTypes.UserConsent, store, serializer, handleGenerationService,
+                logger)
         {
         }
 
@@ -43,7 +44,8 @@ namespace IdentityServer4.Stores
         public Task StoreUserConsentAsync(Consent consent)
         {
             var key = GetConsentKey(consent.SubjectId, consent.ClientId);
-            return StoreItemAsync(key, consent, consent.ClientId, consent.SubjectId, null, null, consent.CreationTime, consent.Expiration);
+            return StoreItemAsync(key, consent, consent.ClientId, consent.SubjectId, null, null, consent.CreationTime,
+                consent.Expiration);
         }
 
         /// <summary>

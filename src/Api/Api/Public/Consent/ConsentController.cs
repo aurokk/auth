@@ -1,6 +1,6 @@
 using Api.Quickstart.Consent;
-using IdentityServer4.Models;
 using IdentityServer4.Services;
+using IdentityServer4.Storage.Stores;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,29 +20,57 @@ public sealed record GetOneResponse(
 }
 
 [PublicAPI]
-public sealed record AcceptRequest(string ReturnUrl);
+public sealed record AcceptRequest(string ConsentRequestId);
 
 [PublicAPI]
-public sealed record RejectRequest;
+public sealed record RejectRequest(string ConsentRequestId);
 
 [ApiController]
 [Route("api/public/consent")]
 public class ConsentController : ControllerBase
 {
     private readonly IIdentityServerInteractionService _interaction;
+    private readonly IConsentRequest2Store _consentRequestStore;
+    private readonly IConsentResponse2Store _consentResponseStore;
+    private readonly IConsentService _consentService;
+    private readonly IUserSession _userSession;
+    private readonly IAuthorizeRequest2Store _authorizeRequest2Store;
 
-    public ConsentController(IIdentityServerInteractionService interaction) =>
+    public ConsentController(
+        IIdentityServerInteractionService interaction,
+        IConsentRequest2Store consentRequestStore,
+        IConsentResponse2Store consentResponseStore,
+        IConsentService consentService,
+        IUserSession userSession,
+        IAuthorizeRequest2Store authorizeRequest2Store)
+    {
         _interaction = interaction;
+        _consentRequestStore = consentRequestStore;
+        _consentResponseStore = consentResponseStore;
+        _consentService = consentService;
+        _userSession = userSession;
+        _authorizeRequest2Store = authorizeRequest2Store;
+    }
 
     [HttpGet]
     [Route("")]
     public async Task<IActionResult> GetOne(
-        [FromQuery] string returnUrl,
+        [FromQuery] string consentRequestId,
         CancellationToken ct)
     {
-        var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
+        if (string.IsNullOrWhiteSpace(consentRequestId) ||
+            !Guid.TryParse(consentRequestId, out var consentRequestGuid)) // TODO
+        {
+            return BadRequest();
+        }
 
-        var apiScopes = request.ValidatedResources.Resources.ApiScopes
+        var consentRequest = await _consentRequestStore.Get(consentRequestGuid, ct);
+        var authorizeRequest = await _authorizeRequest2Store.Get(consentRequest.AuthorizeRequestId, ct);
+        var context =
+            await _interaction.GetAuthorizationContextAsync(
+                returnUrl: $"https://localhost:/?{authorizeRequest.Data}"); // TODO
+
+        var apiScopes = context.ValidatedResources.Resources.ApiScopes
             .Select(s => new GetOneResponse.ScopeDto(
                 Name: s.DisplayName ?? s.Name,
                 Description: s.Description,
@@ -50,7 +78,7 @@ public class ConsentController : ControllerBase
             ))
             .ToArray();
 
-        if (request.ValidatedResources.Resources.OfflineAccess)
+        if (context.ValidatedResources.Resources.OfflineAccess)
         {
             apiScopes = apiScopes
                 .Append(new GetOneResponse.ScopeDto(
@@ -62,11 +90,11 @@ public class ConsentController : ControllerBase
         }
 
         var client = new GetOneResponse.ClientDto(
-            Name: request.Client.ClientName ?? request.Client.ClientId,
-            Description: request.Client.Description
+            Name: context.Client.ClientName ?? context.Client.ClientId,
+            Description: context.Client.Description
         );
 
-        var identityScopes = request.ValidatedResources.Resources.IdentityResources
+        var identityScopes = context.ValidatedResources.Resources.IdentityResources
             .Select(s => new GetOneResponse.ScopeDto(
                 Name: s.DisplayName ?? s.Name,
                 Description: s.Description,
@@ -89,22 +117,43 @@ public class ConsentController : ControllerBase
         [FromBody] AcceptRequest request,
         CancellationToken ct)
     {
-        var context = await _interaction.GetAuthorizationContextAsync(returnUrl: request.ReturnUrl);
-        var grantedConsent = new ConsentResponse
+        if (string.IsNullOrWhiteSpace(request.ConsentRequestId) ||
+            !Guid.TryParse(request.ConsentRequestId, out var consentRequestId)) // TODO
         {
-            // Description = "No description",
-            // Error = null,
-            // ErrorDescription = null,
-            RememberConsent = true,
-            ScopesValuesConsented = new List<string>()
-                .Concat(context.ValidatedResources.Resources.ApiScopes.Select(x => x.Name))
-                .Concat(context.ValidatedResources.Resources.IdentityResources.Select(x => x.Name))
-                .Append(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess)
-                .ToArray(),
-        };
-        await _interaction.GrantConsentAsync(context, grantedConsent);
+            return BadRequest();
+        }
 
-        return Ok();
+        var consentRequest = await _consentRequestStore.Get(consentRequestId, ct);
+        var authorizeRequest = await _authorizeRequest2Store.Get(consentRequest.AuthorizeRequestId, ct);
+        var context =
+            await _interaction.GetAuthorizationContextAsync(
+                returnUrl: $"https://localhost:/?{authorizeRequest.Data}"); // TODO
+        // var grantedConsent = new ConsentResponse
+        // {
+        //     // Description = "No description",
+        //     // Error = null,
+        //     // ErrorDescription = null,
+        //     RememberConsent = true,
+        //     ScopesValuesConsented = new List<string>()
+        //         .Concat(context.ValidatedResources.Resources.ApiScopes.Select(x => x.Name))
+        //         .Concat(context.ValidatedResources.Resources.IdentityResources.Select(x => x.Name))
+        //         .Append(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess)
+        //         .ToArray(),
+        // };
+        // await _interaction.GrantConsentAsync(context, grantedConsent);
+
+        var user = await _userSession.GetUserAsync();
+        await _consentService.UpdateConsentAsync(user, context.Client, context.ValidatedResources.ParsedScopes);
+
+        var consentResponse = new ConsentResponse2(
+            Id: Guid.NewGuid(),
+            ConsentRequestId: consentRequest.Id,
+            CreatedAtUtc: DateTime.UtcNow,
+            RemoveAtUtc: DateTime.UtcNow
+        );
+        await _consentResponseStore.Create(consentResponse, ct);
+
+        return Ok(new { ConsentResponseId = consentResponse.Id, });
     }
 
     [HttpPost]
@@ -113,8 +162,23 @@ public class ConsentController : ControllerBase
         [FromBody] RejectRequest request,
         CancellationToken ct)
     {
-        await Task.CompletedTask;
-        return Ok();
+        if (string.IsNullOrWhiteSpace(request.ConsentRequestId) ||
+            !Guid.TryParse(request.ConsentRequestId, out var consentRequestId)) // TODO
+        {
+            return BadRequest();
+        }
+
+        var consentRequest = await _consentRequestStore.Get(consentRequestId, ct);
+
+        var consentResponse = new ConsentResponse2(
+            Id: Guid.NewGuid(),
+            ConsentRequestId: consentRequest.Id,
+            CreatedAtUtc: DateTime.UtcNow,
+            RemoveAtUtc: DateTime.UtcNow
+        );
+        await _consentResponseStore.Create(consentResponse, ct);
+
+        return Ok(new { ConsentResponseId = consentResponse.Id, });
     }
 
     // private ConsentViewModel CreateConsentViewModel(

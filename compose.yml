@@ -15,7 +15,7 @@ services:
     ports:
       - "20002:5432"
     volumes:
-      - auth:/var/lib/postgresql/data
+      - denji-db:/var/lib/postgresql/data
   denji-migrator:
     build: .
     depends_on:
@@ -42,4 +42,4 @@ services:
     volumes:
       - /Users/dk/.aspnet/https/localhost.pfx:/https/localhost.pfx
 volumes:
-  auth:
+  denji-db:

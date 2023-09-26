@@ -7,20 +7,22 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Extensions;
 using IdentityServer4.Hosting;
-using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
-using IdentityServer4.Stores;
+using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+
+// TODO: почистить код
+// TODO: удалить старый consent стор
+// TODO: сделать отдельный стор для authorization request
 
 namespace IdentityServer4.Endpoints
 {
     internal class AuthorizeEndpoint : AuthorizeEndpointBase
     {
-        private readonly ILoginRequestIdToResponseIdMessageStore _loginRequestIdToResponseIdMessageStore;
-        private readonly ILoginResponseIdToRequestIdMessageStore _loginResponseIdToRequestIdMessageStore;
+        private readonly IAuthorizeRequest2Store _authorizeRequestStore;
 
         public AuthorizeEndpoint(
             IEventService events,
@@ -29,18 +31,33 @@ namespace IdentityServer4.Endpoints
             IAuthorizeRequestValidator validator,
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
-            IUserSession userSession, ILoginRequestIdToResponseIdMessageStore loginRequestIdToResponseIdMessageStore,
-            ILoginResponseIdToRequestIdMessageStore loginResponseIdToRequestIdMessageStore)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession)
+            IUserSession userSession,
+            ILoginRequestStore loginRequestStore,
+            IConsentRequest2Store consentRequestStore,
+            ILoginResponseStore loginResponseStore,
+            IAuthorizeRequest2Store authorizeRequestStore)
+            : base(
+                events: events,
+                logger: logger,
+                options: options,
+                validator: validator,
+                interactionGenerator: interactionGenerator,
+                authorizeResponseGenerator: authorizeResponseGenerator,
+                userSession: userSession,
+                loginRequestStore: loginRequestStore,
+                consentRequestStore: consentRequestStore,
+                loginResponseStore: loginResponseStore
+            )
         {
-            _loginRequestIdToResponseIdMessageStore = loginRequestIdToResponseIdMessageStore;
-            _loginResponseIdToRequestIdMessageStore = loginResponseIdToRequestIdMessageStore;
+            _authorizeRequestStore = authorizeRequestStore;
         }
 
         public override async Task<IEndpointResult> ProcessAsync(HttpContext context)
         {
             Logger.LogDebug("Start authorize request");
 
+            // TODO:
+            // – перенести парсинг параметров в отдельный класс
             NameValueCollection parameters;
 
             if (HttpMethods.IsGet(context.Request.Method))
@@ -61,33 +78,16 @@ namespace IdentityServer4.Endpoints
                 return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
             }
 
+            var authorizeRequest = new AuthorizeRequest2(
+                Id: Guid.NewGuid(),
+                Data: parameters.ToQueryString(),
+                CreatedAtUtc: DateTime.UtcNow,
+                RemoveAtUtc: DateTime.UtcNow + TimeSpan.FromHours(1)
+            );
+            await _authorizeRequestStore.Create(authorizeRequest, context.RequestAborted);
+
             var user = await UserSession.GetUserAsync();
-            var loginRequestId = Guid.NewGuid().ToString();
-
-            if (user == null)
-            {
-                // TODO: переписать нормально
-
-                var loginResponseId = Guid.NewGuid().ToString();
-
-                var loginRequestIdToResponseId = new LoginRequestIdToResponseId { LoginResponseId = loginResponseId, };
-                var loginResponseIdToRequestId = new LoginResponseIdToRequestId { LoginRequestId = loginRequestId, };
-
-                var loginRequestIdToResponseIdMessage = new Message<LoginRequestIdToResponseId>(
-                    loginRequestIdToResponseId, DateTime.UtcNow);
-                var loginResponseIdToRequestIdMessage = new Message<LoginResponseIdToRequestId>(
-                    loginResponseIdToRequestId, DateTime.UtcNow);
-
-                await _loginRequestIdToResponseIdMessageStore.WriteAsync(
-                    loginRequestId, loginRequestIdToResponseIdMessage);
-                await _loginResponseIdToRequestIdMessageStore.WriteAsync(
-                    loginResponseId, loginResponseIdToRequestIdMessage);
-            }
-
-
-            // Тут интересно то, что как бы логин проверяется (через куку), а консент не проверяется
-            // Т.е. всегда будет редирект на консент, хотя он уже может быть
-            var result = await ProcessAuthorizeRequestAsync(parameters, user, null, loginRequestId);
+            var result = await ProcessAuthorizeRequestAsync(authorizeRequest, parameters, user, null);
 
             Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");
 

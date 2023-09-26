@@ -11,6 +11,7 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Endpoints;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Models;
+using IdentityServer4.UnitTests.Common;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -48,11 +49,17 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
         private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator =
             new StubAuthorizeInteractionResponseGenerator();
 
-        private MockLoginRequestIdToResponseIdMessageStore _mockLoginRequestIdToResponseIdMessageStore =
-            new MockLoginRequestIdToResponseIdMessageStore();
+        private MockStore _mockStore =
+            new MockStore();
 
-        private MockLoginResponseIdToRequestIdMessageStore _mockLoginResponseIdToRequestIdMessageStore =
-            new MockLoginResponseIdToRequestIdMessageStore();
+        private MockLoginRequestStore _mockLoginRequestStore =
+            new MockLoginRequestStore();
+
+        private MockLoginResponseStore _mockLoginResponseStore =
+            new MockLoginResponseStore();
+
+        private MockConsentRequestStore _mockConsentRequestStore =
+            new MockConsentRequestStore();
 
         private AuthorizeEndpoint _subject;
 
@@ -115,15 +122,17 @@ namespace IdentityServer.UnitTests.Endpoints.Authorize
             _stubAuthorizeRequestValidator.Result = new AuthorizeRequestValidationResult(_validatedAuthorizeRequest);
 
             _subject = new AuthorizeEndpoint(
-                _fakeEventService,
-                _fakeLogger,
-                _options,
-                _stubAuthorizeRequestValidator,
-                _stubInteractionGenerator,
-                _stubAuthorizeResponseGenerator,
-                _mockUserSession,
-                _mockLoginRequestIdToResponseIdMessageStore,
-                _mockLoginResponseIdToRequestIdMessageStore
+                events: _fakeEventService,
+                logger: _fakeLogger,
+                options: _options,
+                validator: _stubAuthorizeRequestValidator,
+                interactionGenerator: _stubInteractionGenerator,
+                authorizeResponseGenerator: _stubAuthorizeResponseGenerator,
+                userSession: _mockUserSession,
+                loginRequestStore: _mockLoginRequestStore,
+                loginResponseStore: _mockLoginResponseStore,
+                consentRequestStore: _mockConsentRequestStore,
+                authorizeRequestStore: null
             );
         }
     }
