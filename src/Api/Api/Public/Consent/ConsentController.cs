@@ -8,9 +8,8 @@ namespace Api.Api.Public.Consent;
 
 [PublicAPI]
 public sealed record GetOneResponse(
-    GetOneResponse.ScopeDto[] ApiScopes,
     GetOneResponse.ClientDto Client,
-    GetOneResponse.ScopeDto[] IdentityScopes)
+    GetOneResponse.ScopeDto[] Scopes)
 {
     [PublicAPI]
     public sealed record ClientDto(string Name, string Description);
@@ -102,10 +101,14 @@ public class ConsentController : ControllerBase
             ))
             .ToArray();
 
+        var scopes = new List<GetOneResponse.ScopeDto>()
+            .Concat(apiScopes)
+            .Concat(identityScopes)
+            .ToArray();
+
         var response = new GetOneResponse(
-            ApiScopes: apiScopes,
             Client: client,
-            IdentityScopes: identityScopes
+            Scopes: scopes
         );
 
         return Ok(response);
