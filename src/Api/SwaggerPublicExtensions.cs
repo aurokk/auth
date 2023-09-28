@@ -6,7 +6,7 @@ namespace Api;
 
 public static class SwaggerPublicExtensions
 {
-    private const string Name = "public";
+    public const string Name = "public";
     private const string Title = "Public API";
     private const string Version = "1.0";
 

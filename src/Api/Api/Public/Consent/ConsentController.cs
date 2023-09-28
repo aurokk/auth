@@ -24,6 +24,7 @@ public sealed record AcceptRequest(string ConsentRequestId);
 [PublicAPI]
 public sealed record RejectRequest(string ConsentRequestId);
 
+[ApiExplorerSettings(GroupName = SwaggerPublicExtensions.Name)]
 [ApiController]
 [Route("api/public/consent")]
 public class ConsentController : ControllerBase
