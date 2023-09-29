@@ -22,7 +22,13 @@ public sealed record GetOneResponse(
 public sealed record AcceptRequest(string ConsentRequestId);
 
 [PublicAPI]
+public sealed record AcceptResponse(string ConsentResponseId);
+
+[PublicAPI]
 public sealed record RejectRequest(string ConsentRequestId);
+
+[PublicAPI]
+public sealed record RejectResponse(string ConsentResponseId);
 
 [ApiExplorerSettings(GroupName = SwaggerPublicExtensions.Name)]
 [ApiController]
@@ -52,6 +58,7 @@ public class ConsentController : ControllerBase
         _authorizeRequest2Store = authorizeRequest2Store;
     }
 
+    [ProducesResponseType(typeof(GetOneResponse), 200)]
     [HttpGet]
     [Route("")]
     public async Task<IActionResult> GetOne(
@@ -115,6 +122,7 @@ public class ConsentController : ControllerBase
         return Ok(response);
     }
 
+    [ProducesResponseType(typeof(AcceptResponse), 200)]
     [HttpPost]
     [Route("accept")]
     public async Task<IActionResult> Accept(
@@ -157,9 +165,11 @@ public class ConsentController : ControllerBase
         );
         await _consentResponseStore.Create(consentResponse, ct);
 
-        return Ok(new { ConsentResponseId = consentResponse.Id, });
+        var response = new AcceptResponse(ConsentResponseId: consentResponse.Id.ToString());
+        return Ok(response);
     }
 
+    [ProducesResponseType(typeof(RejectResponse), 200)]
     [HttpPost]
     [Route("reject")]
     public async Task<IActionResult> Reject(
@@ -182,7 +192,8 @@ public class ConsentController : ControllerBase
         );
         await _consentResponseStore.Create(consentResponse, ct);
 
-        return Ok(new { ConsentResponseId = consentResponse.Id, });
+        var response = new RejectResponse(ConsentResponseId: consentResponse.Id.ToString());
+        return Ok(response);
     }
 
     // private ConsentViewModel CreateConsentViewModel(
