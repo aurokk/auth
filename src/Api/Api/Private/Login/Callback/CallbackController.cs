@@ -1,12 +1,9 @@
-using System.Web;
-using IdentityServer4.Models;
 using IdentityServer4.Storage.Stores;
-using IdentityServer4.Stores;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace Api.Api.Private.LoginCallback;
+namespace Api.Api.Private.Login.Callback;
 
 [PublicAPI]
 public sealed record AcceptRequest(
@@ -16,16 +13,6 @@ public sealed record AcceptRequest(
 
 [PublicAPI]
 public sealed record AcceptResponse(
-    string? LoginResponseId
-);
-
-[PublicAPI]
-public sealed record RejectRequest(
-    string? LoginRequestId
-);
-
-[PublicAPI]
-public sealed record RejectResponse(
     string? LoginResponseId
 );
 
@@ -94,33 +81,5 @@ public class CallbackController : ControllerBase
 
         var response = new AcceptResponse(loginResponse.Id.ToString("N"));
         return Ok(response);
-    }
-
-    [HttpPost]
-    [Route("reject")]
-    [ProducesResponseType(typeof(RejectResponse), 200)]
-    public async Task<IActionResult> Reject([FromBody] RejectRequest request, CancellationToken ct)
-    {
-        var id = request.LoginRequestId;
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return BadRequest();
-        }
-
-        // var requestIdToResponseIdMessage =
-        //     await _loginRequestIdToResponseIdMessageStore.ReadAsync(request.LoginRequestId);
-        //
-        // var lr = new LoginResponse
-        // {
-        //     IsSuccess = false,
-        // };
-        // var utcNow = DateTime.UtcNow;
-        // var lrMessage = new Message<LoginResponse>(lr, utcNow);
-        // await _loginResponseMessageStore.WriteAsync(requestIdToResponseIdMessage.Data.LoginResponseId, lrMessage);
-
-        // var response = new RejectResponse(requestIdToResponseIdMessage.Data.LoginResponseId);
-        // return Ok(response);
-
-        throw new NotImplementedException();
     }
 }

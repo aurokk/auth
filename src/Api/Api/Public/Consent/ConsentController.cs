@@ -24,12 +24,6 @@ public sealed record AcceptRequest(string ConsentRequestId);
 [PublicAPI]
 public sealed record AcceptResponse(string ConsentResponseId);
 
-[PublicAPI]
-public sealed record RejectRequest(string ConsentRequestId);
-
-[PublicAPI]
-public sealed record RejectResponse(string ConsentResponseId);
-
 [ApiExplorerSettings(GroupName = SwaggerPublicExtensions.Name)]
 [ApiController]
 [Route("api/public/consent")]
@@ -166,33 +160,6 @@ public class ConsentController : ControllerBase
         await _consentResponseStore.Create(consentResponse, ct);
 
         var response = new AcceptResponse(ConsentResponseId: consentResponse.Id.ToString());
-        return Ok(response);
-    }
-
-    [ProducesResponseType(typeof(RejectResponse), 200)]
-    [HttpPost]
-    [Route("reject")]
-    public async Task<IActionResult> Reject(
-        [FromBody] RejectRequest request,
-        CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(request.ConsentRequestId) ||
-            !Guid.TryParse(request.ConsentRequestId, out var consentRequestId)) // TODO
-        {
-            return BadRequest();
-        }
-
-        var consentRequest = await _consentRequestStore.Get(consentRequestId, ct);
-
-        var consentResponse = new ConsentResponse2(
-            Id: Guid.NewGuid(),
-            ConsentRequestId: consentRequest.Id,
-            CreatedAtUtc: DateTime.UtcNow,
-            RemoveAtUtc: DateTime.UtcNow
-        );
-        await _consentResponseStore.Create(consentResponse, ct);
-
-        var response = new RejectResponse(ConsentResponseId: consentResponse.Id.ToString());
         return Ok(response);
     }
 
