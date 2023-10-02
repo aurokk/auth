@@ -23,7 +23,7 @@ services:
         condition: service_healthy
     restart: no
     environment:
-      MODE: MIGRATOR
+      Mode: MIGRATOR
       Database__ConnectionString: "Host=denji-db;Port=5432;Username=denji;Password=denji;Database=denji;"
   denji:
     build: .
@@ -33,12 +33,15 @@ services:
     environment:
       ASPNETCORE_Kestrel__Certificates__Default__Path: /https/localhost.pfx
       ASPNETCORE_Kestrel__Certificates__Default__Password: localhost
-      ASPNETCORE_URLS: "http://+;https://+"
+      Database__ConnectionString: "Host=denji-db;Port=5432;Username=denji;Password=denji;Database=denji;"
       Cors__Origins__0: "http://localhost:20020"
       Cosmo__BaseUrl: "http://localhost:20020"
-      MODE: WEB
+      PrivateApi__HttpPort: 80
+      PublicApi__HttpsPort: 443
+      Mode: WEB
     ports:
       - "20000:443"
+      - "20001:80"
     volumes:
       - /Users/dk/.aspnet/https/localhost.pfx:/https/localhost.pfx
 volumes:

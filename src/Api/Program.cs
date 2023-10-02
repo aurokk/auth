@@ -11,8 +11,40 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var webHost = builder.WebHost;
 var services = builder.Services;
+var configuration = builder.Configuration;
+
+{
+    var mode = configuration.GetValue<string?>("Mode");
+    switch (mode)
+    {
+        case "WEB":
+        {
+            var privateHttpPort = configuration.GetValue<int?>("PrivateApi:HttpPort");
+            var privateHttpsPort = configuration.GetValue<int?>("PrivateApi:HttpsPort");
+            var privateApiPorts = new List<string>();
+            if (privateHttpPort != null) privateApiPorts.Add($"http://+:{privateHttpPort}");
+            if (privateHttpsPort != null) privateApiPorts.Add($"https://+:{privateHttpsPort}");
+            if (!privateApiPorts.Any()) throw new Exception();
+
+            var publicHttpPort = configuration.GetValue<int?>("PublicApi:HttpPort");
+            var publicHttpsPort = configuration.GetValue<int?>("PublicApi:HttpsPort");
+            var publicApiPorts = new List<string>();
+            if (publicHttpPort != null) publicApiPorts.Add($"http://+:{publicHttpPort}");
+            if (publicHttpsPort != null) publicApiPorts.Add($"https://+:{publicHttpsPort}");
+            if (!publicApiPorts.Any()) throw new Exception();
+
+            var allPorts = privateApiPorts.Concat(publicApiPorts).ToArray();
+            var allPortsUnique = privateApiPorts.Concat(publicApiPorts).ToHashSet();
+            if (allPorts.Length != allPortsUnique.Count) throw new Exception();
+
+            webHost.UseUrls(string.Join(";", allPorts));
+            break;
+        }
+    }
+}
+
 
 // var applicationSettingsDto = new ApplicationConfigurationDto();
 // configuration.Bind(applicationSettingsDto);
@@ -53,8 +85,7 @@ var secret = new X509Certificate2(secretBytes);
 services
     .AddCors(options =>
     {
-        var configuration = builder.Configuration;
-        var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? new string[0];
+        var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? Array.Empty<string>();
         options
             .AddDefaultPolicy(policy =>
                 policy
@@ -94,7 +125,6 @@ services
 
         options.EmitStaticAudienceClaim = true;
 
-        var configuration = builder.Configuration;
         var cosmoBaseUrl = configuration.GetValue<string>("Cosmo:BaseUrl") ?? "http://empty";
         var cosmoBaseUri = new Uri(cosmoBaseUrl);
         options.UserInteraction.LoginUrl = new Uri(cosmoBaseUri, "login").AbsoluteUri;
@@ -110,7 +140,6 @@ services
     {
         options.ConfigureDbContext = dbContextBuilder =>
         {
-            var configuration = builder.Configuration;
             var connectionString = configuration.GetValue<string>("Database:ConnectionString");
             dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
         };
@@ -119,7 +148,6 @@ services
     {
         options.ConfigureDbContext = dbContextBuilder =>
         {
-            var configuration = builder.Configuration;
             var connectionString = configuration.GetValue<string>("Database:ConnectionString");
             dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
         };
@@ -134,7 +162,6 @@ services
     .AddScoped<IConsentResponse2Store, ConsentResponseStore>()
     .AddDbContext<OperationalDbContext>(dbContextBuilder =>
     {
-        var configuration = builder.Configuration;
         var connectionString = configuration.GetValue<string>("Database:ConnectionString");
         dbContextBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Migrations"));
     });
@@ -146,40 +173,60 @@ services
 var application = builder.Build();
 
 application
-    .UseSwagger()
-    .UseSwaggerUI(config =>
-    {
-        config.AddPrivateEndpoint();
-        config.AddPublicEndpoint();
-    });
+    .MapWhen(
+        context =>
+            (context.Connection.LocalPort == context.RequestServices.GetRequiredService<IConfiguration>()
+                 .GetValue<int>("PublicApi:HttpPort") ||
+             context.Connection.LocalPort == context.RequestServices.GetRequiredService<IConfiguration>()
+                 .GetValue<int>("PublicApi:HttpsPort")) &&
+            (context.Request.Path.StartsWithSegments("/api/public") ||
+             context.Request.Path.StartsWithSegments("/connect") ||
+             context.Request.Path.StartsWithSegments("/.well-known")),
+        publicApplication => publicApplication
+            .UseForwardedHeaders()
+            .UseStaticFiles()
+            .UseRouting()
+            .UseCors()
+            .UseIdentityServer()
+            .UseAuthentication()
+            .UseAuthorization()
+            .UseEndpoints(endpoints => endpoints.MapControllers())
+    );
 
 application
-    .UseForwardedHeaders()
-    .UseStaticFiles()
-    .UseRouting()
-    .UseCors()
-    .UseIdentityServer()
-    .UseAuthentication()
-    .UseAuthorization();
-
-application
-    .MapHealthChecks("/health/ready", new HealthCheckOptions
-    {
-        Predicate = healthCheck => healthCheck.Tags.Contains("ready"),
-    });
-
-application
-    .MapHealthChecks("/health/live", new HealthCheckOptions
-    {
-        Predicate = _ => false,
-    });
-
-application
-    .MapDefaultControllerRoute();
+    .MapWhen(
+        context =>
+            (context.Connection.LocalPort == context.RequestServices.GetRequiredService<IConfiguration>()
+                 .GetValue<int>("PrivateApi:HttpPort") ||
+             context.Connection.LocalPort == context.RequestServices.GetRequiredService<IConfiguration>()
+                 .GetValue<int>("PrivateApi:HttpsPort")) &&
+            (context.Request.Path.StartsWithSegments("/api/private") ||
+             context.Request.Path.StartsWithSegments("/health") ||
+             context.Request.Path.StartsWithSegments("/swagger")),
+        privateApplication => privateApplication
+            .UseSwagger()
+            .UseSwaggerUI(config =>
+            {
+                config.AddPrivateEndpoint();
+                config.AddPublicEndpoint();
+            })
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+                {
+                    Predicate = healthCheck => healthCheck.Tags.Contains("ready"),
+                });
+                endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+                {
+                    Predicate = _ => false,
+                });
+                endpoints.MapControllers();
+            })
+    );
 
 {
-    var configuration = builder.Configuration;
-    var mode = configuration.GetValue<string?>("MODE");
+    var mode = configuration.GetValue<string?>("Mode");
     switch (mode)
     {
         case "MIGRATOR":
@@ -194,7 +241,7 @@ application
             return;
         }
 
-        default:
+        case "WEB":
         {
             await application.RunAsync();
             return;

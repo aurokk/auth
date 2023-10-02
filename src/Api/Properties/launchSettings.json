@@ -5,13 +5,14 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:20000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Cors__Origins__0": "http://localhost:20020",
         "Cosmo__BaseUrl": "http://localhost:20020",
         "Database__ConnectionString": "Host=localhost;Port=20002;Username=denji;Password=denji;Database=denji;",
-        "MODE": "WEB"
+        "Mode": "WEB",
+        "PrivateApi__HttpPort": "20001",
+        "PublicApi__HttpPort": "20000"
       }
     },
     "Migrator": {
@@ -21,7 +22,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Database__ConnectionString": "Host=localhost;Port=20002;Username=denji;Password=denji;Database=denji;",
-        "MODE": "MIGRATOR"
+        "Mode": "MIGRATOR"
       }
     }
   }
