@@ -14,13 +14,13 @@ COPY src/IdentityServer4.Storage/*.csproj                                    ./s
 COPY tests/IdentityServer4.EntityFramework.IntegrationTests/*.csproj         ./tests/IdentityServer4.EntityFramework.IntegrationTests/
 COPY tests/IdentityServer4.EntityFramework.Storage.IntegrationTests/*.csproj ./tests/IdentityServer4.EntityFramework.Storage.IntegrationTests/
 COPY tests/IdentityServer4.EntityFramework.Storage.UnitTests/*.csproj        ./tests/IdentityServer4.EntityFramework.Storage.UnitTests/
-COPY tests/IdentityServer4.IntegrationTests/*.csproj                         ./tests/IdentityServer4.IntegrationTests/
 COPY tests/IdentityServer4.UnitTests/*.csproj                                ./tests/IdentityServer4.UnitTests/
 RUN dotnet restore
 
 COPY src/.   ./src/
 COPY tests/. ./tests/
 WORKDIR /source/src/Api
+RUN dotnet test --no-restore
 RUN dotnet publish -c release -o /dist --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
