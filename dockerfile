@@ -19,8 +19,9 @@ RUN dotnet restore
 
 COPY src/.   ./src/
 COPY tests/. ./tests/
-WORKDIR /source/src/Api
 RUN dotnet test --no-restore
+
+WORKDIR /source/src/Api
 RUN dotnet publish -c release -o /dist --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
